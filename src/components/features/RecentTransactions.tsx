@@ -7,6 +7,7 @@ import { Select } from '../ui/Select';
 import { Dialog, DialogHeader, DialogTitle } from '../ui/Dialog';
 import { TransactionForm } from './TransactionForm';
 import { exportTransactionsToCSV } from '../../lib/exportCsv';
+import { X } from 'lucide-react';
 
 export function RecentTransactions() {
     const transactions = useBudgetStore((state) => state.transactions);
@@ -18,15 +19,30 @@ export function RecentTransactions() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState<TransactionType | 'ALL'>('ALL');
     const [filterCategory, setFilterCategory] = useState<string>('ALL');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+
+    const hasActiveFilters = searchQuery || filterType !== 'ALL' || filterCategory !== 'ALL' || startDate || endDate;
+
+    const resetFilters = () => {
+        setSearchQuery('');
+        setFilterType('ALL');
+        setFilterCategory('ALL');
+        setStartDate('');
+        setEndDate('');
+    };
 
     const filteredTransactions = useMemo(() => {
         return transactions.filter(tx => {
             const matchesSearch = tx.description.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesType = filterType === 'ALL' || tx.type === filterType;
             const matchesCategory = filterCategory === 'ALL' || tx.categoryId === filterCategory;
-            return matchesSearch && matchesType && matchesCategory;
+            const txDate = tx.date.slice(0, 10);
+            const matchesStart = !startDate || txDate >= startDate;
+            const matchesEnd = !endDate || txDate <= endDate;
+            return matchesSearch && matchesType && matchesCategory && matchesStart && matchesEnd;
         });
-    }, [transactions, searchQuery, filterType, filterCategory]);
+    }, [transactions, searchQuery, filterType, filterCategory, startDate, endDate]);
 
     return (
         <Card>
@@ -69,6 +85,31 @@ export function RecentTransactions() {
                         ))}
                     </Select>
                 </div>
+                <div className="flex flex-col sm:flex-row gap-3 mb-6 items-end">
+                    <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                        <div className="flex flex-col gap-1 flex-1">
+                            <label className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Date début</label>
+                            <Input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1 flex-1">
+                            <label className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Date fin</label>
+                            <Input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    {hasActiveFilters && (
+                        <Button variant="outline" size="sm" onClick={resetFilters} className="flex items-center gap-1 shrink-0">
+                            <X className="w-4 h-4" /> Réinitialiser
+                        </Button>
+                    )}
+                </div>
 
                 {filteredTransactions.length === 0 ? (
                     <p className="text-sm text-zinc-500 text-center py-4">Aucune transaction trouvée.</p>
@@ -93,7 +134,7 @@ export function RecentTransactions() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 mt-3 sm:mt-0">
-                                        <span className={`font-bold whitespace-nowrap ${tx.type === 'INCOME' ? 'text-valex-success' : 'text-valex-danger'}`}>
+                                        <span className={`font-bold whitespace-nowrap ${tx.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
                                             {tx.type === 'INCOME' ? '+' : '-'}{tx.amount.toFixed(2)} {currency}
                                         </span>
                                         <div className="flex items-center gap-2">

@@ -33,8 +33,8 @@ export function AuthPage() {
                 if (error) throw error;
                 setSuccessMessage("Vérifiez votre boîte e-mail pour le lien de confirmation.");
             }
-        } catch (err: any) {
-            setError(err.message || 'Une erreur est survenue lors de l\'authentification.');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de l\'authentification.');
         } finally {
             setIsLoading(false);
         }
@@ -84,7 +84,7 @@ export function AuthPage() {
                                 required
                             />
                         </div>
-                        <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={isLoading}>
+                        <Button type="submit" className="w-full bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 transition-opacity text-white border-0" disabled={isLoading}>
                             {isLoading ? 'Chargement...' : isLogin ? 'Se connecter' : 'S\'inscrire'}
                         </Button>
                     </form>

@@ -10,12 +10,14 @@ import { RecentTransactions } from './components/features/RecentTransactions';
 import { ProfilePage } from './components/features/ProfilePage';
 import { RecurringManager } from './components/features/RecurringManager';
 import { useTheme } from './hooks/useTheme';
+import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft } from 'lucide-react';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRecurringOpen, setIsRecurringOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
 
@@ -39,54 +41,108 @@ function App() {
   if (!initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex font-sans overflow-hidden h-screen bg-valex-background dark:bg-valex-darkBg text-zinc-800 dark:text-zinc-200">
+    <div className="flex font-sans overflow-hidden h-screen bg-background dark:bg-background text-zinc-800 dark:text-zinc-200">
       {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-valex-darkCard shadow-valex border-r border-zinc-200 dark:border-zinc-800 flex flex-col hidden md:flex z-20">
-        <div className="h-16 flex items-center px-6 border-b border-zinc-100 dark:border-zinc-800/50">
-          <h1 className="text-2xl font-bold tracking-tight text-indigo-600 cursor-pointer" onClick={() => setIsProfileOpen(false)}>Budgy</h1>
+      <aside className={`${sidebarOpen ? 'w-[260px]' : 'w-0'} bg-white dark:bg-[#12122A] shadow-xl border-r border-zinc-200 dark:border-white/5 flex-col hidden md:flex z-20 transition-all duration-300 overflow-hidden`}>
+        <div className="h-20 flex items-center px-6 border-b border-zinc-100 dark:border-white/5">
+          <h1 
+            className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent cursor-pointer" 
+            onClick={() => setIsProfileOpen(false)}
+          >
+            Budgy
+          </h1>
         </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 mt-2">Principal</p>
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 bg-indigo-600/10 text-indigo-600 rounded-valex font-medium transition-colors">
-            📊 Tableau de bord
+        
+        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+          <p className="px-3 text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3">Principal</p>
+          <button className="w-full flex items-center gap-3 px-4 py-3 bg-primary/10 dark:bg-primary/20 text-primary dark:text-white rounded-xl font-medium transition-all shadow-[0_0_15px_rgba(108,92,231,0.15)]">
+            <LayoutDashboard className="w-5 h-5 text-primary" />
+            Tableau de bord
           </button>
 
-          <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 mt-6">Gestion</p>
-          <button onClick={() => setIsCategoryModalOpen(true)} className="w-full flex items-center gap-3 px-3 py-2.5 text-zinc-600 hover:bg-indigo-600/5 hover:text-indigo-600 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 rounded-valex font-medium transition-colors">
-            📁 Catégories
+          <p className="px-3 text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 mt-8">Gestion</p>
+          <button 
+            onClick={() => setIsCategoryModalOpen(true)} 
+            className="w-full flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white rounded-xl font-medium transition-all"
+          >
+            <FolderOpen className="w-5 h-5" />
+            Catégories
           </button>
-          <button onClick={() => setIsRecurringOpen(true)} className="w-full flex items-center gap-3 px-3 py-2.5 text-zinc-600 hover:bg-indigo-600/5 hover:text-indigo-600 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 rounded-valex font-medium transition-colors">
-            🔁 Récurrences
+          
+          <button 
+            onClick={() => setIsRecurringOpen(true)} 
+            className="w-full flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white rounded-xl font-medium transition-all"
+          >
+            <Repeat className="w-5 h-5" />
+            Récurrences
           </button>
         </nav>
+
+        {/* User Profile in Sidebar Footer */}
+        <div className="p-4 border-t border-zinc-100 dark:border-white/5">
+          <div 
+            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 cursor-pointer transition-all"
+            onClick={() => setIsProfileOpen(true)}
+          >
+            <div className="relative">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-primary flex items-center justify-center text-white font-bold shadow-md">
+                {(displayName?.[0] || user?.email?.[0] || 'B').toUpperCase()}
+              </div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-white dark:border-[#12122A]"></div>
+            </div>
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+                {displayName || "Utilisateur"}
+              </span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                Gérer le profil
+              </span>
+            </div>
+          </div>
+        </div>
       </aside>
 
       {/* Main Panel */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="h-16 bg-white/80 dark:bg-valex-darkCard/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 sm:px-6 z-10 shrink-0 shadow-sm">
+        <header className="h-20 bg-background/80 dark:bg-background/80 backdrop-blur-xl border-b border-zinc-200 dark:border-white/5 flex items-center justify-between px-6 z-10 shrink-0 shadow-sm sticky top-0">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold md:hidden text-indigo-600">Budgy</h1>
-            {/* Mobile menu toggle could go here */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="hidden md:flex w-10 h-10 rounded-full items-center justify-center bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors"
+              title={sidebarOpen ? 'Masquer la barre latérale' : 'Afficher la barre latérale'}
+            >
+              {sidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />}
+            </button>
+            <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent md:hidden">Budgy</h1>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button onClick={cycleTheme} title={`Thème: ${theme}`} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-lg">
+          <div className="flex items-center gap-3 sm:gap-5">
+            <button 
+              onClick={cycleTheme} 
+              title={`Thème: ${theme}`} 
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors text-lg"
+            >
               {themeIcon}
             </button>
-            <Button onClick={() => setIsModalOpen(true)} className="shadow-valex md:hidden">
+            
+            <Button onClick={() => setIsModalOpen(true)} className="md:hidden">
               +
             </Button>
-            <Button onClick={() => setIsModalOpen(true)} className="shadow-valex hidden md:flex">
+            <Button onClick={() => setIsModalOpen(true)} className="hidden md:flex">
               + Transaction
             </Button>
-            <div className="w-9 h-9 ml-2 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold cursor-pointer shadow-valex hover:opacity-90 transition-opacity" onClick={() => setIsProfileOpen(true)} title="Mon Profil">
+
+            <button 
+              onClick={() => setIsProfileOpen(true)}
+              className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-primary flex items-center justify-center text-white font-bold shadow-lg hover:opacity-90 transition-opacity md:hidden"
+            >
               {(displayName?.[0] || user?.email?.[0] || 'B').toUpperCase()}
-            </div>
+            </button>
           </div>
         </header>
 
@@ -128,7 +184,7 @@ function App() {
 
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
         <div className="max-h-[80vh] overflow-y-auto w-full max-w-lg">
-          <ProfilePage onClose={() => setIsProfileOpen(false)} />
+          <ProfilePage />
         </div>
       </Dialog>
 

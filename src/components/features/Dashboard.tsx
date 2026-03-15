@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Progress } from '../ui/Progress';
 import { HistoryChart } from './HistoryChart';
 import { SavingGoals } from './SavingGoals';
+import { DonutChart } from '../ui/DonutChart';
+import { motion } from 'framer-motion';
+import CountUp from 'react-countup';
+import { TrendingUp, TrendingDown, Wallet, AlertTriangle } from 'lucide-react';
 
 export function Dashboard() {
     const transactions = useBudgetStore((state) => state.transactions);
@@ -53,71 +57,93 @@ export function Dashboard() {
 
     return (
         <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
-                <Card className="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white shadow-valex-lg border-0">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-white/80">
-                            Solde Actuel
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold">
-                            {data.balance >= 0 ? '+' : ''}{data.balance.toFixed(2)} {currency}
+            <motion.div 
+                className="grid gap-4 md:grid-cols-3"
+                variants={{
+                    hidden: { opacity: 0 },
+                    show: {
+                        opacity: 1,
+                        transition: { staggerChildren: 0.1 }
+                    }
+                }}
+                initial="hidden"
+                animate="show"
+            >
+                <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
+                    <Card className="bg-gradient-to-br from-primary to-[#8B7CF6] text-white shadow-xl shadow-primary/20 border-0 overflow-hidden relative h-full">
+                        <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
+                            <Wallet className="w-32 h-32" />
                         </div>
-                    </CardContent>
-                </Card>
+                        <CardHeader className="pb-2 relative z-10 flex flex-row items-center justify-between space-y-0">
+                            <CardTitle className="text-sm font-medium text-white/80">
+                                Solde Actuel
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative z-10">
+                            <div className="text-3xl md:text-[40px] leading-none font-bold flex flex-wrap items-baseline gap-1 mt-2">
+                                <span className="whitespace-nowrap">
+                                    <span>{data.balance >= 0 ? '+' : ''}</span>
+                                    <CountUp end={Math.abs(data.balance)} duration={0.8} decimals={2} separator=" " />
+                                </span>
+                                <span className="text-xl md:text-2xl font-semibold opacity-80">{currency}</span>
+                            </div>
+                            <p className="text-sm text-white/70 mt-3 font-medium">Ce mois</p>
+                        </CardContent>
+                    </Card>
+                </motion.div>
 
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-zinc-500">Revenus</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-valex-success">
-                            +{data.totalIncome.toFixed(2)} {currency}
-                        </div>
-                    </CardContent>
-                </Card>
+                <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
+                    <Card className="h-full bg-white dark:bg-card">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Revenus</CardTitle>
+                            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                                <TrendingUp className="w-5 h-5 text-success" />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-3xl font-bold text-success flex items-baseline gap-1 mt-2">
+                                <span>+</span>
+                                <CountUp end={data.totalIncome} duration={0.8} decimals={2} separator=" " />
+                                <span className="text-lg">{currency}</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
 
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-zinc-500">Dépenses</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-valex-danger">
-                            -{data.totalExpense.toFixed(2)} {currency}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+                <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
+                    <Card className="h-full bg-white dark:bg-card">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Dépenses</CardTitle>
+                            <div className="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center">
+                                <TrendingDown className="w-5 h-5 text-danger" />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-3xl font-bold text-danger flex items-baseline gap-1 mt-2">
+                                <span>-</span>
+                                <CountUp end={data.totalExpense} duration={0.8} decimals={2} separator=" " />
+                                <span className="text-lg">{currency}</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            </motion.div>
 
             <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                     <CardHeader>
                         <CardTitle>Répartition par Catégorie</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        {data.expensesByCategory.length === 0 ? (
-                            <p className="text-sm text-zinc-500">Aucune dépense ce mois-ci.</p>
-                        ) : (
-                            data.expensesByCategory.map((exp) => {
-                                const percent = data.totalExpense > 0 ? (exp.amount / data.totalExpense) * 100 : 0;
-                                return (
-                                    <div key={exp.categoryId} className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-2">
-                                                <div
-                                                    className="w-3 h-3 rounded-full"
-                                                    style={{ backgroundColor: exp.color }}
-                                                />
-                                                <span className="font-medium">{exp.name}</span>
-                                            </div>
-                                            <span className="font-bold">{exp.amount.toFixed(2)} {currency}</span>
-                                        </div>
-                                        <Progress value={percent} indicatorColor={`bg-[${exp.color}]`} />
-                                    </div>
-                                );
-                            })
-                        )}
+                    <CardContent>
+                        <DonutChart 
+                            data={data.expensesByCategory.map(e => ({
+                                id: e.categoryId,
+                                label: e.name,
+                                value: e.amount,
+                                color: e.color
+                            }))} 
+                            currency={currency} 
+                        />
                     </CardContent>
                 </Card>
 
@@ -125,8 +151,8 @@ export function Dashboard() {
                     <CardHeader>
                         <CardTitle>Alertes & Budgets</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        {categories.map((cat) => {
+                    <CardContent className="space-y-4">
+                        {categories.map((cat, i) => {
                             if (!cat.monthlyThreshold) return null;
                             const expenseForCat = data.expensesByCategory.find(e => e.categoryId === cat.id)?.amount || 0;
                             const thresholdPercent = (expenseForCat / cat.monthlyThreshold) * 100;
@@ -134,22 +160,37 @@ export function Dashboard() {
                             const isWarning = thresholdPercent >= 80 && !isOverBudget;
 
                             return (
-                                <div key={cat.id} className="space-y-2">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-1">
-                                        <span className="font-medium flex items-center gap-2">
-                                            {cat.name} plafond
-                                            {isOverBudget && <span className="text-xs bg-valex-danger/10 text-valex-danger px-2 py-0.5 rounded-full">Dépassé</span>}
-                                            {isWarning && <span className="text-xs bg-valex-warning/10 text-valex-warning px-2 py-0.5 rounded-full">Attention</span>}
-                                        </span>
-                                        <span className="text-zinc-500">
-                                            {expenseForCat.toFixed(2)} {currency} / {cat.monthlyThreshold} {currency}
-                                        </span>
+                                <motion.div 
+                                    key={cat.id} 
+                                    className={`space-y-3 p-4 rounded-2xl border ${isOverBudget ? 'border-danger/20 bg-danger/5' : isWarning ? 'border-warning/20 bg-warning/5' : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]'}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3, delay: i * 0.1 }}
+                                >
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-2">
+                                        <div className="font-medium flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${cat.color}20` }}>
+                                                 {isOverBudget ? <AlertTriangle className="w-4 h-4 text-danger" /> : <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-zinc-900 dark:text-zinc-100">{cat.name}</span>
+                                                <div className="flex gap-2 items-center">
+                                                    {isOverBudget && <span className="text-[10px] uppercase tracking-wider font-bold text-danger">Dépassé</span>}
+                                                    {isWarning && <span className="text-[10px] uppercase tracking-wider font-bold text-warning">Attention</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-left sm:text-right">
+                                            <span className="font-bold text-zinc-900 dark:text-zinc-100">{expenseForCat.toFixed(2)} {currency}</span>
+                                            <span className="text-zinc-500 text-xs ml-1">/ {cat.monthlyThreshold} {currency}</span>
+                                        </div>
                                     </div>
                                     <Progress
                                         value={Math.min(thresholdPercent, 100)}
-                                        indicatorColor={isOverBudget ? "bg-valex-danger" : isWarning ? "bg-valex-warning" : "bg-valex-primary"}
+                                        indicatorColor={isOverBudget ? "bg-danger" : isWarning ? "bg-warning" : `bg-[${cat.color}]`}
+                                        className="h-1.5"
                                     />
-                                </div>
+                                </motion.div>
                             );
                         })}
                     </CardContent>

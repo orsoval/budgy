@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         // Fetch original session
-        supabase.auth.getSession().then(({ data: { session: s } }: any) => {
+        supabase.auth.getSession().then(({ data: { session: s } }) => {
             if (s) {
                 setSession({ access_token: s.access_token, user: { id: s.user.id, email: s.user.email } });
                 setUser({ id: s.user.id, email: s.user.email });
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, s: any) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
             if (s) {
                 setSession({ access_token: s.access_token, user: { id: s.user.id, email: s.user.email } });
                 setUser({ id: s.user.id, email: s.user.email });
@@ -72,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {

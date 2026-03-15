@@ -129,6 +129,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             displayName: profile?.display_name || '',
             currency: profile?.currency || '€',
             locale: profile?.locale || 'fr-FR',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             categories: (categoriesData || []).map((c: Record<string, any>) => ({
                 id: c.id,
                 name: c.name,
@@ -137,6 +138,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
                 type: c.type,
                 monthlyThreshold: c.monthly_threshold
             })),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             transactions: (transactionsData || []).map((t: Record<string, any>) => ({
                 id: t.id,
                 amount: t.amount,
@@ -145,6 +147,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
                 date: t.date,
                 description: t.description
             })),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             recurringTransactions: (recurringData || []).map((r: Record<string, any>) => ({
                 id: r.id,
                 categoryId: r.category_id,
@@ -155,6 +158,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
                 nextDate: r.next_date,
                 isActive: r.is_active
             })),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             savingGoals: (savingGoalsData || []).map((g: Record<string, any>) => ({
                 id: g.id,
                 name: g.name,

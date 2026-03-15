@@ -8,7 +8,7 @@
     <script>
       // Apply theme immediately to prevent flash of wrong theme
       (function() {
-        var theme = localStorage.getItem('budgy-theme') || 'system';
+        var theme = localStorage.getItem('budgy-theme') || 'dark';
         var dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         if (dark) document.documentElement.classList.add('dark');
       })();

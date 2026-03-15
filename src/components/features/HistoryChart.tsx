@@ -50,7 +50,7 @@ export function HistoryChart() {
                             <div key={i} className="flex-1 flex flex-col items-center gap-2">
                                 <div className="w-full flex justify-center items-end gap-1 h-36">
                                     <div
-                                        className="w-full max-w-4 bg-valex-success rounded-t-sm relative group"
+                                        className="w-full max-w-4 bg-success rounded-t-sm relative group"
                                         style={{ height: `${incomeHeight}%` }}
                                     >
                                         <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-1 left-1/2 -translate-x-1/2 text-xs bg-zinc-800 text-white px-2 py-1 rounded whitespace-nowrap z-10 transition-opacity">
@@ -58,7 +58,7 @@ export function HistoryChart() {
                                         </div>
                                     </div>
                                     <div
-                                        className="w-full max-w-4 bg-valex-danger rounded-t-sm relative group"
+                                        className="w-full max-w-4 bg-danger rounded-t-sm relative group"
                                         style={{ height: `${expenseHeight}%` }}
                                     >
                                         <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-1 left-1/2 -translate-x-1/2 text-xs bg-zinc-800 text-white px-2 py-1 rounded whitespace-nowrap z-10 transition-opacity">
@@ -73,11 +73,11 @@ export function HistoryChart() {
                 </div>
                 <div className="flex justify-center gap-6 mt-6">
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-valex-success"></div>
+                        <div className="w-3 h-3 rounded-full bg-success"></div>
                         <span className="text-sm text-zinc-600 dark:text-zinc-400">Revenus</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-valex-danger"></div>
+                        <div className="w-3 h-3 rounded-full bg-danger"></div>
                         <span className="text-sm text-zinc-600 dark:text-zinc-400">Dépenses</span>
                     </div>
                 </div>

@@ -4,8 +4,47 @@ import { useAuth } from '../providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Progress } from '../ui/Progress';
 import { Dialog, DialogHeader, DialogTitle } from '../ui/Dialog';
+import { motion } from 'framer-motion';
+
+function ProgressRing({ radius, stroke, progress, color }: { radius: number, stroke: number, progress: number, color: string }) {
+    const normalizedRadius = radius - stroke * 2;
+    const circumference = normalizedRadius * 2 * Math.PI;
+    const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+    return (
+        <div className="relative inline-flex items-center justify-center">
+            <svg height={radius * 2} width={radius * 2} className="transform -rotate-90">
+                <circle
+                    stroke="currentColor"
+                    fill="transparent"
+                    strokeWidth={stroke}
+                    r={normalizedRadius}
+                    cx={radius}
+                    cy={radius}
+                    className="text-zinc-100 dark:text-white/5"
+                />
+                <motion.circle
+                    stroke={color}
+                    fill="transparent"
+                    strokeWidth={stroke}
+                    strokeDasharray={circumference + ' ' + circumference}
+                    style={{ strokeDashoffset }}
+                    strokeLinecap="round"
+                    r={normalizedRadius}
+                    cx={radius}
+                    cy={radius}
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center flex-col">
+                <span className="text-xl font-bold dark:text-white">{Math.floor(progress)}%</span>
+            </div>
+        </div>
+    );
+}
 
 export function SavingGoals() {
     const savingGoals = useBudgetStore((s) => s.savingGoals);
@@ -30,34 +69,48 @@ export function SavingGoals() {
                     <p className="text-sm text-zinc-500">Aucun objectif d'épargne pour le moment.</p>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {savingGoals.map((g) => {
+                        {savingGoals.map((g, i) => {
                             const percent = Math.min((g.currentAmount / g.targetAmount) * 100, 100);
                             const remaining = Math.max(g.targetAmount - g.currentAmount, 0);
 
                             return (
-                                <div key={g.id} className="p-4 rounded-valex shadow-sm border-0 bg-white dark:bg-valex-darkCard flex flex-col justify-between group">
+                                <motion.div 
+                                    key={g.id} 
+                                    className="p-5 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-card flex flex-col justify-between group transition-all duration-300 hover:shadow-lg dark:hover:shadow-[0_8px_30px_rgba(108,92,231,0.1)] hover:-translate-y-1"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3, delay: i * 0.1 }}
+                                >
                                     <div>
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: g.color }} />
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h3 className="font-semibold text-lg text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
                                                 {g.name}
                                             </h3>
                                             <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                                 <button onClick={() => setEditing(g)} className="text-xs text-zinc-500 hover:text-indigo-600 px-2 py-1">Éditer</button>
                                                 <button onClick={() => {
                                                     if (window.confirm(`Supprimer l'objectif "${g.name}" ?`)) deleteSavingGoal(g.id);
-                                                }} className="text-xs text-zinc-500 hover:text-rose-600 px-2 py-1">✕</button>
+                                                }} className="text-xs text-zinc-500 hover:text-danger px-2 py-1">✕</button>
                                             </div>
                                         </div>
 
-                                        <div className="flex justify-between text-sm mb-1 mt-4">
-                                            <span className="font-medium">{g.currentAmount.toFixed(2)} {currency}</span>
-                                            <span className="text-zinc-500">/ {g.targetAmount.toFixed(2)} {currency}</span>
+                                        <div className="flex flex-col items-center justify-center py-4">
+                                            <ProgressRing radius={60} stroke={10} progress={percent} color={g.color} />
                                         </div>
-                                        <Progress value={percent} indicatorColor={`bg-[${g.color}]`} className="h-2" />
 
-                                        <div className="flex justify-between text-xs text-zinc-500 mt-2">
-                                            <span>Reste : {remaining.toFixed(2)} {currency}</span>
+                                        <div className="flex justify-between text-sm mt-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-zinc-500 text-xs uppercase font-medium tracking-wider">Actuel</span>
+                                                <span className="font-bold text-zinc-900 dark:text-white">{g.currentAmount.toFixed(2)} {currency}</span>
+                                            </div>
+                                            <div className="flex flex-col text-right">
+                                                <span className="text-zinc-500 text-xs uppercase font-medium tracking-wider">Objectif</span>
+                                                <span className="font-bold text-zinc-900 dark:text-white">{g.targetAmount.toFixed(2)} {currency}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-between text-xs text-zinc-500 mt-4 pt-4 border-t border-zinc-100 dark:border-white/5">
+                                            <span className="font-medium text-primary">Reste : {remaining.toFixed(2)} {currency}</span>
                                             {g.deadline && <span>Échéance: {new Date(g.deadline).toLocaleDateString('fr-FR')}</span>}
                                         </div>
                                     </div>
@@ -65,12 +118,12 @@ export function SavingGoals() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="w-full mt-4 bg-white dark:bg-zinc-950"
+                                        className="w-full mt-4"
                                         onClick={() => setFunding(g)}
                                     >
                                         Ajouter des fonds
                                     </Button>
-                                </div>
+                                </motion.div>
                             );
                         })}
                     </div>

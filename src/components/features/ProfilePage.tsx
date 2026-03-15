@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 
-export function ProfilePage({ onClose: _onClose }: { onClose: () => void }) {
+export function ProfilePage() {
     const { user, signOut } = useAuth();
     const updateProfile = useBudgetStore((state) => state.updateProfile);
     const [loading, setLoading] = useState(true);

@@ -70,12 +70,12 @@ export function Dashboard() {
                 animate="show"
             >
                 <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
-                    <Card className="bg-gradient-to-br from-primary to-[#8B7CF6] text-white shadow-xl shadow-primary/20 border-0 overflow-hidden relative h-full">
+                    <Card className="bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 shadow-xl shadow-zinc-900/10 dark:shadow-white/10 border-0 overflow-hidden relative h-full">
                         <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
                             <Wallet className="w-32 h-32" />
                         </div>
                         <CardHeader className="pb-2 relative z-10 flex flex-row items-center justify-between space-y-0">
-                            <CardTitle className="text-sm font-medium text-white/80">
+                            <CardTitle className="text-sm font-medium opacity-80">
                                 Solde Actuel
                             </CardTitle>
                         </CardHeader>
@@ -87,7 +87,7 @@ export function Dashboard() {
                                 </span>
                                 <span className="text-xl md:text-2xl font-semibold opacity-80">{currency}</span>
                             </div>
-                            <p className="text-sm text-white/70 mt-3 font-medium">Ce mois</p>
+                            <p className="text-sm opacity-70 mt-3 font-medium">Ce mois</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -101,10 +101,12 @@ export function Dashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-success flex items-baseline gap-1 mt-2">
-                                <span>+</span>
-                                <CountUp end={data.totalIncome} duration={0.8} decimals={2} separator=" " />
-                                <span className="text-lg">{currency}</span>
+                            <div className="text-3xl font-bold text-success flex flex-wrap items-baseline gap-1 mt-2">
+                                <span className="whitespace-nowrap">
+                                    <span>+</span>
+                                    <CountUp end={data.totalIncome} duration={0.8} decimals={2} separator=" " />
+                                </span>
+                                <span className="text-lg font-semibold opacity-90">{currency}</span>
                             </div>
                         </CardContent>
                     </Card>
@@ -119,10 +121,12 @@ export function Dashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-danger flex items-baseline gap-1 mt-2">
-                                <span>-</span>
-                                <CountUp end={data.totalExpense} duration={0.8} decimals={2} separator=" " />
-                                <span className="text-lg">{currency}</span>
+                            <div className="text-3xl font-bold text-danger flex flex-wrap items-baseline gap-1 mt-2">
+                                <span className="whitespace-nowrap">
+                                    <span>-</span>
+                                    <CountUp end={data.totalExpense} duration={0.8} decimals={2} separator=" " />
+                                </span>
+                                <span className="text-lg font-semibold opacity-90">{currency}</span>
                             </div>
                         </CardContent>
                     </Card>

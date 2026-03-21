@@ -85,7 +85,7 @@ export function RecentTransactions() {
                     <span className={`font-bold font-mono-num whitespace-nowrap text-sm sm:text-base ${isIncome ? 'text-success' : 'text-danger'}`}>
                         {isIncome ? '+' : '-'}{tx.amount.toFixed(2)} {currency}
                     </span>
-                    <div className="flex items-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center opacity-100 sm:opacity-50 sm:group-hover:opacity-100 transition-opacity">
                         <button 
                             onClick={() => setEditingTx(tx)}
                             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"

@@ -64,7 +64,7 @@ export function RecurringManager() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity mt-2 sm:mt-0 gap-1 shrink-0">
+                                    <div className="flex items-center opacity-100 sm:opacity-50 sm:group-hover:opacity-100 transition-opacity mt-2 sm:mt-0 gap-1 shrink-0">
                                         <button 
                                             onClick={() => setEditing(r)}
                                             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"

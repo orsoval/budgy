@@ -7,7 +7,7 @@ import { Select } from '../ui/Select';
 import { Dialog, DialogHeader, DialogTitle } from '../ui/Dialog';
 import { TransactionForm } from './TransactionForm';
 import { exportTransactionsToCSV } from '../../lib/exportCsv';
-import { X } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Edit2, Trash2 } from 'lucide-react';
 
 export function RecentTransactions() {
     const transactions = useBudgetStore((state) => state.transactions);
@@ -43,6 +43,72 @@ export function RecentTransactions() {
             return matchesSearch && matchesType && matchesCategory && matchesStart && matchesEnd;
         });
     }, [transactions, searchQuery, filterType, filterCategory, startDate, endDate]);
+
+    const { tIncome, tExpense } = useMemo(() => {
+        return filteredTransactions.reduce(
+            (acc, tx) => {
+                if (tx.type === 'INCOME') acc.tIncome += tx.amount;
+                else acc.tExpense += tx.amount;
+                return acc;
+            },
+            { tIncome: 0, tExpense: 0 }
+        );
+    }, [filteredTransactions]);
+
+    const grandTotal = tIncome - tExpense;
+
+    const incomeTransactions = useMemo(() => filteredTransactions.filter(tx => tx.type === 'INCOME'), [filteredTransactions]);
+    const expenseTransactions = useMemo(() => filteredTransactions.filter(tx => tx.type === 'EXPENSE'), [filteredTransactions]);
+
+    const renderTransactionOptions = (tx: Transaction, isIncome: boolean) => {
+        const category = categories.find(c => c.id === tx.categoryId);
+        return (
+            <div
+                key={tx.id}
+                className="flex items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors group"
+            >
+                <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                    <div
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: `${category?.color || '#94a3b8'}25`, color: category?.color || '#94a3b8' }}
+                    >
+                        {isIncome ? <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> : <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm sm:text-base truncate text-zinc-900 dark:text-zinc-50">{tx.description}</p>
+                        <p className="text-[10px] sm:text-xs text-zinc-500 truncate mt-0.5">
+                            {category?.name || 'Inconnue'} <span className="mx-1.5 opacity-40">•</span> {new Date(tx.date).toLocaleDateString()}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
+                    <span className={`font-bold font-mono-num whitespace-nowrap text-sm sm:text-base ${isIncome ? 'text-success' : 'text-danger'}`}>
+                        {isIncome ? '+' : '-'}{tx.amount.toFixed(2)} {currency}
+                    </span>
+                    <div className="flex items-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <button 
+                            onClick={() => setEditingTx(tx)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
+                            title="Modifier"
+                        >
+                            <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                            onClick={() => {
+                                if (window.confirm("Voulez-vous vraiment supprimer cette transaction ?")) {
+                                    deleteTransaction(tx.id);
+                                }
+                            }}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-danger hover:bg-danger/10 transition-colors"
+                            title="Supprimer"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <Card>
@@ -114,45 +180,60 @@ export function RecentTransactions() {
                 {filteredTransactions.length === 0 ? (
                     <p className="text-sm text-zinc-500 text-center py-4">Aucune transaction trouvée.</p>
                 ) : (
-                    <div className="space-y-4">
-                        {filteredTransactions.map((tx) => {
-                            const category = categories.find(c => c.id === tx.categoryId);
-                            return (
-                                <div key={tx.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-                                    <div className="flex gap-4">
-                                        <div
-                                            className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"
-                                            style={{ backgroundColor: category?.color || '#cbd5e1' }}
-                                        >
-                                            {tx.type === 'INCOME' ? '+' : '-'}
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-zinc-900 dark:text-zinc-50">{tx.description}</p>
-                                            <p className="text-xs text-zinc-500">
-                                                {category?.name || 'Inconnue'} • {new Date(tx.date).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 mt-3 sm:mt-0">
-                                        <span className={`font-bold whitespace-nowrap ${tx.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
-                                            {tx.type === 'INCOME' ? '+' : '-'}{tx.amount.toFixed(2)} {currency}
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="sm" onClick={() => setEditingTx(tx)}>
-                                                Éditer
-                                            </Button>
-                                            <Button variant="destructive" size="sm" onClick={() => {
-                                                if (window.confirm("Supprimer cette transaction ?")) {
-                                                    deleteTransaction(tx.id);
-                                                }
-                                            }}>
-                                                ✕
-                                            </Button>
-                                        </div>
+                    <div className="space-y-8">
+                        {/* Section Revenus */}
+                        {incomeTransactions.length > 0 && (
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider px-2 flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4 text-success" />
+                                    Revenus
+                                </h3>
+                                <div className="space-y-2">
+                                    {incomeTransactions.map(tx => renderTransactionOptions(tx, true))}
+                                </div>
+                                <div className="flex justify-between items-center py-3 px-3 mt-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                                    <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-sm ml-2">Sous-total Revenus</span>
+                                    <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
+                                        <span className="font-bold text-success font-mono-num text-sm sm:text-base">+{tIncome.toFixed(2)} {currency}</span>
+                                        <div className="w-[64px] hidden sm:block" />
+                                        <div className="w-[64px] sm:hidden" />
                                     </div>
                                 </div>
-                            );
-                        })}
+                            </div>
+                        )}
+
+                        {/* Section Dépenses */}
+                        {expenseTransactions.length > 0 && (
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider px-2 flex items-center gap-2">
+                                    <TrendingDown className="w-4 h-4 text-danger" />
+                                    Dépenses
+                                </h3>
+                                <div className="space-y-2">
+                                    {expenseTransactions.map(tx => renderTransactionOptions(tx, false))}
+                                </div>
+                                <div className="flex justify-between items-center py-3 px-3 mt-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                                    <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-sm ml-2">Sous-total Dépenses</span>
+                                    <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
+                                        <span className="font-bold text-danger font-mono-num text-sm sm:text-base">-{tExpense.toFixed(2)} {currency}</span>
+                                        <div className="w-[64px] hidden sm:block" />
+                                        <div className="w-[64px] sm:hidden" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Section Grand Total */}
+                        <div className={`flex justify-between items-center py-5 px-3 mt-6 rounded-xl border-2 ${grandTotal >= 0 ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
+                            <span className="font-black text-lg tracking-tight text-zinc-900 dark:text-zinc-50 ml-3">BILAN GÉNÉRAL</span>
+                            <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
+                                <span className={`font-black text-xl sm:text-2xl font-mono-num ${grandTotal >= 0 ? 'text-success' : 'text-danger'}`}>
+                                    {grandTotal > 0 ? '+' : ''}{grandTotal.toFixed(2)} {currency}
+                                </span>
+                                <div className="w-[64px] hidden sm:block" />
+                                <div className="w-[64px] sm:hidden" />
+                            </div>
+                        </div>
                     </div>
                 )}
             </CardContent>

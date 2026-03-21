@@ -6,6 +6,7 @@ import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Dialog, DialogHeader, DialogTitle } from '../ui/Dialog';
 import { useAuth } from '../providers/AuthProvider';
+import { FolderOpen, Edit2, Trash2 } from 'lucide-react';
 
 export function CategoryManager() {
     const categories = useBudgetStore((state) => state.categories);
@@ -32,32 +33,42 @@ export function CategoryManager() {
                 ) : (
                     <div className="space-y-3">
                         {categories.map((cat) => (
-                            <div key={cat.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                            <div key={cat.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors group">
                                 <div className="flex items-center gap-3">
                                     <div
-                                        className="w-8 h-8 rounded-full"
-                                        style={{ backgroundColor: cat.color }}
-                                    />
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                        style={{ backgroundColor: `${cat.color}25`, color: cat.color }}
+                                    >
+                                        <FolderOpen className="w-4 h-4" />
+                                    </div>
                                     <div>
                                         <p className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
-                                            {cat.name} <span className="text-xs text-zinc-500 ml-2">({cat.type === 'INCOME' ? 'Revenu' : 'Dépense'})</span>
+                                            {cat.name} <span className="text-[10px] text-zinc-400 ml-2 uppercase tracking-wide">({cat.type === 'INCOME' ? 'Revenu' : 'Dépense'})</span>
                                         </p>
                                         <p className="text-xs text-zinc-500">
-                                            {cat.monthlyThreshold ? `Plafond: ${cat.monthlyThreshold} € / mois` : 'Aucun plafond'}
+                                            {cat.monthlyThreshold ? `Plafond: ${cat.monthlyThreshold} €` : 'Aucun plafond'}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2 mt-3 sm:mt-0">
-                                    <Button variant="outline" size="sm" onClick={() => setEditingCat(cat)}>
-                                        Éditer
-                                    </Button>
-                                    <Button variant="destructive" size="sm" onClick={() => {
-                                        if (window.confirm(`Supprimer la catégorie "${cat.name}" ?`)) {
-                                            deleteCategory(cat.id);
-                                        }
-                                    }}>
-                                        ✕
-                                    </Button>
+                                <div className="flex items-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity mt-2 sm:mt-0 gap-1">
+                                    <button 
+                                        onClick={() => setEditingCat(cat)}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
+                                        title="Éditer"
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            if (window.confirm(`Supprimer la catégorie "${cat.name}" ?`)) {
+                                                deleteCategory(cat.id);
+                                            }
+                                        }}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-danger hover:bg-danger/10 transition-colors"
+                                        title="Supprimer"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         ))}

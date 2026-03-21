@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Dialog, DialogHeader, DialogTitle } from '../ui/Dialog';
+import { Repeat, Edit2, Trash2 } from 'lucide-react';
 
 const FREQ_LABELS: Record<RecurringFrequency, string> = {
     weekly: 'Hebdomadaire',
@@ -39,29 +40,47 @@ export function RecurringManager() {
                         {recurring.map((r) => {
                             const cat = categories.find((c) => c.id === r.categoryId);
                             return (
-                                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-                                    <div className="flex items-center gap-3">
+                                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors group">
+                                    <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
                                         <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                                            style={{ backgroundColor: cat?.color || '#cbd5e1' }}
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                            style={{ backgroundColor: `${cat?.color || '#94a3b8'}25`, color: cat?.color || '#94a3b8' }}
                                         >
-                                            {r.type === 'INCOME' ? '+' : '-'}
+                                            <Repeat className="w-4 h-4" />
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium text-sm text-zinc-900 dark:text-zinc-50 truncate">
                                                 {r.description}
-                                                {!r.isActive && <span className="ml-2 text-xs text-zinc-400">(en pause)</span>}
+                                                {!r.isActive && <span className="ml-2 text-[10px] text-zinc-400 uppercase tracking-wide">(en pause)</span>}
                                             </p>
-                                            <p className="text-xs text-zinc-500">
-                                                {r.amount.toFixed(2)} {currency} • {FREQ_LABELS[r.frequency]} • Prochaine: {new Date(r.nextDate).toLocaleDateString('fr-FR')}
+                                            <p className="text-xs text-zinc-500 truncate">
+                                                <span className={`font-semibold ${r.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
+                                                    {r.type === 'INCOME' ? '+' : '-'}{r.amount.toFixed(2)} {currency}
+                                                </span>
+                                                <span className="mx-1.5 opacity-40">•</span>
+                                                {FREQ_LABELS[r.frequency]} 
+                                                <span className="mx-1.5 opacity-40">•</span>
+                                                Prochaine: {new Date(r.nextDate).toLocaleDateString('fr-FR')}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                                        <Button variant="outline" size="sm" onClick={() => setEditing(r)}>Éditer</Button>
-                                        <Button variant="destructive" size="sm" onClick={() => {
-                                            if (window.confirm(`Supprimer "${r.description}" ?`)) deleteRecurring(r.id);
-                                        }}>✕</Button>
+                                    <div className="flex items-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity mt-2 sm:mt-0 gap-1 shrink-0">
+                                        <button 
+                                            onClick={() => setEditing(r)}
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
+                                            title="Éditer"
+                                        >
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                if (window.confirm(`Supprimer "${r.description}" ?`)) deleteRecurring(r.id);
+                                            }}
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-danger hover:bg-danger/10 transition-colors"
+                                            title="Supprimer"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </div>
                             );

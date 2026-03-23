@@ -6,7 +6,6 @@ import { HistoryChart } from './HistoryChart';
 import { SavingGoals } from './SavingGoals';
 import { DonutChart } from '../ui/DonutChart';
 import { motion } from 'framer-motion';
-import CountUp from 'react-countup';
 import { TrendingUp, TrendingDown, Wallet, AlertTriangle } from 'lucide-react';
 
 /** Formatte un montant de façon compacte : 1 500 → "1.5k", 1 200 000 → "1.2M" */
@@ -167,7 +166,13 @@ export function Dashboard() {
                             return (
                                 <motion.div 
                                     key={cat.id} 
-                                    className={`space-y-3 p-4 rounded-2xl border ${isOverBudget ? 'border-danger/20 bg-danger/5' : isWarning ? 'border-warning/20 bg-warning/5' : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]'}`}
+                                    className={`space-y-3 p-4 rounded-2xl border transition-colors ${
+                                        isOverBudget 
+                                            ? 'border-rose-200 dark:border-rose-900/50 bg-rose-50/60 dark:bg-rose-900/10' 
+                                            : isWarning 
+                                                ? 'border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-900/10' 
+                                                : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]'
+                                    }`}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3, delay: i * 0.1 }}
@@ -175,24 +180,24 @@ export function Dashboard() {
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-2">
                                         <div className="font-medium flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${cat.color}20` }}>
-                                                 {isOverBudget ? <AlertTriangle className="w-4 h-4 text-danger" /> : <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />}
+                                                 {isOverBudget ? <AlertTriangle className="w-4 h-4 text-rose-500" /> : <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />}
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="text-zinc-900 dark:text-zinc-100">{cat.name}</span>
                                                 <div className="flex gap-2 items-center">
-                                                    {isOverBudget && <span className="text-[10px] uppercase tracking-wider font-bold text-danger">Dépassé</span>}
-                                                    {isWarning && <span className="text-[10px] uppercase tracking-wider font-bold text-warning">Attention</span>}
+                                                    {isOverBudget && <span className="text-[10px] uppercase tracking-wider font-bold text-rose-500">Dépassé</span>}
+                                                    {isWarning && <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-500">Attention</span>}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="text-left sm:text-right">
-                                            <span className="font-bold text-zinc-900 dark:text-zinc-100">{expenseForCat.toFixed(2)} {currency}</span>
-                                            <span className="text-zinc-500 text-xs ml-1">/ {cat.monthlyThreshold} {currency}</span>
+                                        <div className="text-left sm:text-right flex items-baseline gap-1">
+                                            <span className={`font-bold ${ isOverBudget ? 'text-rose-600 dark:text-rose-400' : isWarning ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-900 dark:text-zinc-100' }`}>{formatAmount(expenseForCat)}</span>
+                                            <span className="text-zinc-400 text-xs">/ {formatAmount(cat.monthlyThreshold)} {currency}</span>
                                         </div>
                                     </div>
                                     <Progress
                                         value={Math.min(thresholdPercent, 100)}
-                                        indicatorColor={isOverBudget ? "bg-danger" : isWarning ? "bg-warning" : `bg-[${cat.color}]`}
+                                        indicatorColor={isOverBudget ? "bg-rose-500" : isWarning ? "bg-amber-400" : `bg-[${cat.color}]`}
                                         className="h-1.5"
                                     />
                                 </motion.div>

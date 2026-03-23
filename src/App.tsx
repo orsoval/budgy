@@ -68,7 +68,11 @@ function App() {
             Budgy
           </h1>
           {!sidebarOpen && (
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-primary font-bold text-xl absolute left-5 cursor-pointer" onClick={() => setIsProfileOpen(false)}>
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-lg absolute left-5 cursor-pointer shadow-md"
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+              onClick={() => setIsProfileOpen(false)}
+            >
               B
             </div>
           )}
@@ -170,10 +174,18 @@ function App() {
               {themeIcon}
             </button>
             
-            <Button onClick={() => setIsModalOpen(true)} className="md:hidden">
+            <Button 
+              onClick={() => setIsModalOpen(true)} 
+              className="md:hidden"
+              style={{ boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}
+            >
               +
             </Button>
-            <Button onClick={() => setIsModalOpen(true)} className="hidden md:flex">
+            <Button 
+              onClick={() => setIsModalOpen(true)} 
+              className="hidden md:flex"
+              style={{ boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}
+            >
               + Transaction
             </Button>
 
@@ -186,13 +198,13 @@ function App() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10">
           <div className="max-w-6xl mx-auto space-y-6">
-            <div className="mb-2">
+            <div className="mb-6">
               <h2 className="text-2xl font-bold tracking-tight">
-                {displayName ? `Bonjour, ${displayName}` : "Vue d'ensemble"}
+                {displayName ? `Bonjour, ${displayName} 👋` : "Vue d'ensemble"}
               </h2>
-              <p className="text-zinc-500">Bienvenue sur votre tableau de bord financier.</p>
+              <p className="text-zinc-500 mt-1">Bienvenue sur votre tableau de bord financier.</p>
             </div>
 
             <div className="space-y-6">

@@ -1,6 +1,13 @@
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+function formatAmount(value: number): string {
+    if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+    if (Math.abs(value) >= 10_000) return `${(value / 1_000).toFixed(0)}k`;
+    if (Math.abs(value) >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
+    return value.toFixed(0);
+}
+
 interface DonutChartItem {
     id: string;
     label: string;
@@ -142,11 +149,11 @@ export function DonutChart({ data, currency }: DonutChartProps) {
                                     {segment.label}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <span className="font-bold text-zinc-900 dark:text-white">
-                                    {segment.value.toFixed(2)} {currency}
+                            <div className="flex items-center gap-3 shrink-0">
+                                <span className="font-bold text-zinc-900 dark:text-white whitespace-nowrap text-sm">
+                                    {formatAmount(segment.value)} <span className="font-medium text-zinc-500 text-xs">{currency}</span>
                                 </span>
-                                <span className="text-zinc-500 w-10 text-right font-medium">
+                                <span className="text-zinc-400 w-9 text-right font-medium text-xs">
                                     {(segment.percentage * 100).toFixed(0)}%
                                 </span>
                             </div>

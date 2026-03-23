@@ -9,6 +9,14 @@ import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { TrendingUp, TrendingDown, Wallet, AlertTriangle } from 'lucide-react';
 
+/** Formatte un montant de façon compacte : 1 500 → "1.5k", 1 200 000 → "1.2M" */
+function formatAmount(value: number): string {
+    if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+    if (Math.abs(value) >= 10_000) return `${(value / 1_000).toFixed(0)}k`;
+    if (Math.abs(value) >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
+    return value.toFixed(2);
+}
+
 export function Dashboard() {
     const transactions = useBudgetStore((state) => state.transactions);
     const categories = useBudgetStore((state) => state.categories);
@@ -70,24 +78,23 @@ export function Dashboard() {
                 animate="show"
             >
                 <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
-                    <Card className="bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 shadow-xl shadow-zinc-900/10 dark:shadow-white/10 border-0 overflow-hidden relative h-full">
-                        <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
+                    <Card className="text-zinc-50 border-0 overflow-hidden relative h-full" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%)', boxShadow: '0 8px 32px rgba(99,102,241,0.35)' }}>
+                        <div className="absolute right-0 top-0 opacity-[0.12] transform translate-x-4 -translate-y-4">
                             <Wallet className="w-32 h-32" />
                         </div>
                         <CardHeader className="pb-2 relative z-10 flex flex-row items-center justify-between space-y-0">
-                            <CardTitle className="text-sm font-medium opacity-80">
+                            <CardTitle className="text-sm font-medium opacity-80 text-white">
                                 Solde Actuel
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="relative z-10">
-                            <div className="text-3xl md:text-[40px] leading-none font-bold flex flex-wrap items-baseline gap-1 mt-2">
-                                <span className="whitespace-nowrap">
-                                    <span>{data.balance >= 0 ? '+' : ''}</span>
-                                    <CountUp end={Math.abs(data.balance)} duration={0.8} decimals={2} separator=" " />
+                            <div className="flex items-baseline gap-2 mt-2 flex-wrap">
+                                <span className="text-3xl md:text-4xl font-black leading-none whitespace-nowrap">
+                                    {data.balance >= 0 ? '+' : '-'}{formatAmount(Math.abs(data.balance))}
                                 </span>
-                                <span className="text-xl md:text-2xl font-semibold opacity-80">{currency}</span>
+                                <span className="text-lg font-semibold opacity-80">{currency}</span>
                             </div>
-                            <p className="text-sm opacity-70 mt-3 font-medium">Ce mois</p>
+                            <p className="text-sm opacity-60 mt-3 font-medium">Ce mois</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -101,12 +108,9 @@ export function Dashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-success flex flex-wrap items-baseline gap-1 mt-2">
-                                <span className="whitespace-nowrap">
-                                    <span>+</span>
-                                    <CountUp end={data.totalIncome} duration={0.8} decimals={2} separator=" " />
-                                </span>
-                                <span className="text-lg font-semibold opacity-90">{currency}</span>
+                            <div className="flex items-baseline gap-2 mt-2 flex-wrap">
+                                <span className="text-3xl md:text-4xl font-black leading-none text-success whitespace-nowrap">+{formatAmount(data.totalIncome)}</span>
+                                <span className="text-lg font-semibold text-success opacity-80">{currency}</span>
                             </div>
                         </CardContent>
                     </Card>
@@ -121,12 +125,9 @@ export function Dashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-danger flex flex-wrap items-baseline gap-1 mt-2">
-                                <span className="whitespace-nowrap">
-                                    <span>-</span>
-                                    <CountUp end={data.totalExpense} duration={0.8} decimals={2} separator=" " />
-                                </span>
-                                <span className="text-lg font-semibold opacity-90">{currency}</span>
+                            <div className="flex items-baseline gap-2 mt-2 flex-wrap">
+                                <span className="text-3xl md:text-4xl font-black leading-none text-danger whitespace-nowrap">-{formatAmount(data.totalExpense)}</span>
+                                <span className="text-lg font-semibold text-danger opacity-80">{currency}</span>
                             </div>
                         </CardContent>
                     </Card>

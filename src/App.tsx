@@ -10,7 +10,7 @@ import { RecentTransactions } from './components/features/RecentTransactions';
 import { ProfilePage } from './components/features/ProfilePage';
 import { RecurringManager } from './components/features/RecurringManager';
 import { useTheme } from './hooks/useTheme';
-import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft, PlusCircle, List, User } from 'lucide-react';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +18,7 @@ function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRecurringOpen, setIsRecurringOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileTab, setMobileTab] = useState<'dashboard' | 'transactions'>('dashboard');
   
   const [tooltip, setTooltip] = useState<{ text: string, y: number } | null>(null);
 
@@ -176,29 +177,15 @@ function App() {
             
             <Button 
               onClick={() => setIsModalOpen(true)} 
-              className="md:hidden"
-              style={{ boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}
-            >
-              +
-            </Button>
-            <Button 
-              onClick={() => setIsModalOpen(true)} 
               className="hidden md:flex"
               style={{ boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}
             >
               + Transaction
             </Button>
-
-            <button 
-              onClick={() => setIsProfileOpen(true)}
-              className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-primary flex items-center justify-center text-white font-bold shadow-lg hover:opacity-90 transition-opacity md:hidden"
-            >
-              {(displayName?.[0] || user?.email?.[0] || 'B').toUpperCase()}
-            </button>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10">
+        <main className="flex-1 overflow-y-auto p-4 pb-24 md:pb-0 md:p-8 lg:p-10">
           <div className="max-w-6xl mx-auto space-y-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold tracking-tight">
@@ -209,7 +196,13 @@ function App() {
 
             <div className="space-y-6">
               <Dashboard />
-              <RecentTransactions />
+              {/* On mobile, show either dashboard or transactions based on tab */}
+              <div className={mobileTab === 'transactions' ? 'block' : 'hidden md:block'}>
+                <RecentTransactions />
+              </div>
+              <div className={mobileTab === 'dashboard' ? 'block md:hidden' : 'hidden'}>
+                {/* Dashboard is always visible on desktop, only visible when tab=dashboard on mobile */}
+              </div>
             </div>
 
             <footer className="py-6 mt-12 border-t border-zinc-200 dark:border-zinc-800">
@@ -220,6 +213,66 @@ function App() {
           </div>
         </main>
       </div>
+
+      {/* ===== MOBILE BOTTOM NAVIGATION ===== */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-t border-zinc-200 dark:border-white/5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center justify-around h-16 px-2">
+
+          {/* Dashboard */}
+          <button
+            onClick={() => setMobileTab('dashboard')}
+            className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all ${
+              mobileTab === 'dashboard' ? 'text-primary' : 'text-zinc-400 dark:text-zinc-500'
+            }`}
+          >
+            <LayoutDashboard className={`w-5 h-5 transition-transform ${mobileTab === 'dashboard' ? 'scale-110' : ''}`} />
+            <span className="text-[10px] font-medium">Accueil</span>
+          </button>
+
+          {/* Transactions */}
+          <button
+            onClick={() => setMobileTab('transactions')}
+            className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all ${
+              mobileTab === 'transactions' ? 'text-primary' : 'text-zinc-400 dark:text-zinc-500'
+            }`}
+          >
+            <List className={`w-5 h-5 transition-transform ${mobileTab === 'transactions' ? 'scale-110' : ''}`} />
+            <span className="text-[10px] font-medium">Transactions</span>
+          </button>
+
+          {/* Add — centre button */}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 -mt-4"
+          >
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg text-white"
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 4px 20px rgba(99,102,241,0.45)' }}
+            >
+              <PlusCircle className="w-7 h-7" />
+            </div>
+          </button>
+
+          {/* Catégories */}
+          <button
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-zinc-400 dark:text-zinc-500 transition-all hover:text-primary"
+          >
+            <FolderOpen className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Catégories</span>
+          </button>
+
+          {/* Profil */}
+          <button
+            onClick={() => setIsProfileOpen(true)}
+            className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-zinc-400 dark:text-zinc-500 transition-all hover:text-primary"
+          >
+            <User className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Profil</span>
+          </button>
+
+        </div>
+      </nav>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogHeader>

@@ -13,15 +13,18 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black/60 flex flex-col justify-end sm:justify-center items-center animate-in fade-in duration-200">
             <div
                 className="fixed inset-0"
                 onClick={() => onOpenChange?.(false)}
             />
-            <div className="relative z-50 grid w-full max-w-lg gap-4 border border-zinc-200 bg-white p-6 shadow-lg duration-200 sm:rounded-lg dark:border-zinc-800 dark:bg-zinc-950 sm:max-w-[425px]">
+            <div className="relative z-50 w-full max-w-lg sm:max-w-[425px] flex flex-col gap-4 border-t sm:border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 pb-8 sm:pb-6 shadow-2xl sm:rounded-2xl rounded-t-[1.5rem] animate-in slide-in-from-bottom-1/2 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
+                {/* Drag Handle Indicator (Mobile only) */}
+                <div className="mx-auto w-12 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 -mt-2 mb-2 sm:hidden" />
+                
                 <button
                     onClick={() => onOpenChange?.(false)}
-                    className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-zinc-100 data-[state=open]:text-zinc-500 dark:ring-offset-zinc-950 dark:focus:ring-zinc-800 dark:data-[state=open]:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                    className="absolute right-4 top-4 rounded-full w-8 h-8 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400"
                 >
                     <X className="h-4 w-4" />
                     <span className="sr-only">Fermer</span>

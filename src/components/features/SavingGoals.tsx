@@ -14,7 +14,7 @@ function ProgressRing({ radius, stroke, progress, color }: { radius: number, str
 
     return (
         <div className="relative inline-flex items-center justify-center">
-            <svg height={radius * 2} width={radius * 2} className="transform -rotate-90">
+            <svg height={radius * 2} width={radius * 2} className="transform -rotate-90 relative z-10">
                 <circle
                     stroke="currentColor"
                     fill="transparent"
@@ -29,7 +29,10 @@ function ProgressRing({ radius, stroke, progress, color }: { radius: number, str
                     fill="transparent"
                     strokeWidth={stroke}
                     strokeDasharray={circumference + ' ' + circumference}
-                    style={{ strokeDashoffset }}
+                    style={{ 
+                        strokeDashoffset,
+                        filter: `drop-shadow(0px 0px 8px ${color}60)`
+                    }}
                     strokeLinecap="round"
                     r={normalizedRadius}
                     cx={radius}
@@ -39,9 +42,22 @@ function ProgressRing({ radius, stroke, progress, color }: { radius: number, str
                     transition={{ duration: 1.5, ease: "easeOut" }}
                 />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center flex-col">
-                <span className="text-xl font-bold dark:text-white">{Math.floor(progress)}%</span>
+            <div className="absolute inset-0 flex items-center justify-center flex-col z-20">
+                <motion.span 
+                    className="text-2xl font-black text-zinc-900 dark:text-white"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.8, type: "spring", bounce: 0.5 }}
+                >
+                    {Math.floor(progress)}%
+                </motion.span>
             </div>
+            
+            {/* Background ambient glow */}
+            <div 
+                className="absolute inset-0 rounded-full blur-xl opacity-20 dark:opacity-30 z-0" 
+                style={{ backgroundColor: color, transform: 'scale(0.85)' }} 
+            />
         </div>
     );
 }

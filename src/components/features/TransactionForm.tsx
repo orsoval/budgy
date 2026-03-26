@@ -21,6 +21,7 @@ export function TransactionForm({ initialData, onSuccess }: TransactionFormProps
     const categories = useBudgetStore((state) => state.categories);
     const addTransaction = useBudgetStore((state) => state.addTransaction);
     const editTransaction = useBudgetStore((state) => state.editTransaction);
+    const currency = useBudgetStore((state) => state.currency);
     const { user } = useAuth();
 
     const filteredCategories = categories.filter((c) => c.type === type);
@@ -77,7 +78,7 @@ export function TransactionForm({ initialData, onSuccess }: TransactionFormProps
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Montant (€)</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Montant ({currency})</label>
                 <Input
                     type="number"
                     step="0.01"

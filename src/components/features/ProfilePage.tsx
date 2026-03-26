@@ -133,7 +133,7 @@ export function ProfilePage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Plafond de dépenses mensuel global (€)</label>
+                            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Plafond de dépenses mensuel global ({currency})</label>
                             <Input
                                 type="number"
                                 step="0.01"

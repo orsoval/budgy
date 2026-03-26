@@ -195,13 +195,11 @@ function App() {
             </div>
 
             <div className="space-y-6">
-              <Dashboard />
-              {/* On mobile, show either dashboard or transactions based on tab */}
-              <div className={mobileTab === 'transactions' ? 'block' : 'hidden md:block'}>
-                <RecentTransactions />
+              <div className={mobileTab === 'transactions' ? 'hidden md:block' : 'block'}>
+                <Dashboard />
               </div>
-              <div className={mobileTab === 'dashboard' ? 'block md:hidden' : 'hidden'}>
-                {/* Dashboard is always visible on desktop, only visible when tab=dashboard on mobile */}
+              <div className={mobileTab === 'dashboard' ? 'hidden md:block' : 'block'}>
+                <RecentTransactions />
               </div>
             </div>
 

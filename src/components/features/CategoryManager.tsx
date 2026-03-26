@@ -11,6 +11,7 @@ import { FolderOpen, Edit2, Trash2 } from 'lucide-react';
 export function CategoryManager() {
     const categories = useBudgetStore((state) => state.categories);
     const deleteCategory = useBudgetStore((state) => state.deleteCategory);
+    const currency = useBudgetStore((state) => state.currency);
     const { user } = useAuth();
 
     const [editingCat, setEditingCat] = useState<Category | null>(null);
@@ -46,7 +47,7 @@ export function CategoryManager() {
                                             {cat.name} <span className="text-[10px] text-zinc-400 ml-2 uppercase tracking-wide">({cat.type === 'INCOME' ? 'Revenu' : 'Dépense'})</span>
                                         </p>
                                         <p className="text-xs text-zinc-500">
-                                            {cat.monthlyThreshold ? `Plafond: ${cat.monthlyThreshold} €` : 'Aucun plafond'}
+                                            {cat.monthlyThreshold ? `Plafond: ${cat.monthlyThreshold} ${currency}` : 'Aucun plafond'}
                                         </p>
                                     </div>
                                 </div>
@@ -95,6 +96,7 @@ export function CategoryManager() {
 function CategoryForm({ initialData, onSuccess, userId }: { initialData?: Category, onSuccess: () => void, userId: string }) {
     const addCategory = useBudgetStore((state) => state.addCategory);
     const editCategory = useBudgetStore((state) => state.editCategory);
+    const currency = useBudgetStore((state) => state.currency);
 
     const [name, setName] = useState(initialData?.name || '');
     const [color, setColor] = useState(initialData?.color || '#3b82f6');
@@ -161,7 +163,7 @@ function CategoryForm({ initialData, onSuccess, userId }: { initialData?: Catego
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Plafond Mensuel (€) - Optionnel</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Plafond Mensuel ({currency}) - Optionnel</label>
                 <Input
                     type="number"
                     step="0.01"

@@ -62,10 +62,16 @@ export function RecentTransactions() {
 
     const renderTransactionOptions = (tx: Transaction, isIncome: boolean) => {
         const category = categories.find(c => c.id === tx.categoryId);
+        
+        // Dynamic styling for readability
+        const bgClass = isIncome 
+            ? "border-success/10 bg-success/5 hover:bg-success/10 dark:border-success/20 dark:bg-success/[0.03] dark:hover:bg-success/[0.08]"
+            : "border-danger/10 bg-danger/5 hover:bg-danger/10 dark:border-danger/20 dark:bg-danger/[0.03] dark:hover:bg-danger/[0.08]";
+
         return (
             <div
                 key={tx.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors group"
+                className={`flex items-center justify-between p-3 rounded-xl border transition-colors group ${bgClass}`}
             >
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
                     <div

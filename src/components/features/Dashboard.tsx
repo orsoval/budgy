@@ -5,9 +5,8 @@ import { Progress } from '../ui/Progress';
 import { HistoryChart } from './HistoryChart';
 import { SavingGoals } from './SavingGoals';
 import { DonutChart } from '../ui/DonutChart';
-import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Wallet, AlertTriangle } from 'lucide-react';
-
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, TrendingDown, Wallet, AlertTriangle, Layers, CreditCard } from 'lucide-react';
 /** Formatte un montant de façon compacte : 1 500 → "1.5k", 1 200 000 → "1.2M" */
 function formatAmount(value: number): string {
     if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
@@ -19,23 +18,36 @@ function formatAmount(value: number): string {
 export function Dashboard() {
     const transactions = useBudgetStore((state) => state.transactions);
     const categories = useBudgetStore((state) => state.categories);
+    const accounts = useBudgetStore((state) => state.accounts);
     const currency = useBudgetStore((state) => state.currency);
+    const activeAccountId = useBudgetStore((state) => state.activeAccountId);
+    const setActiveAccountId = useBudgetStore((state) => state.setActiveAccountId);
+
+    const activeAccount = useMemo(() => 
+        activeAccountId ? accounts.find(a => a.id === activeAccountId) : null
+    , [accounts, activeAccountId]);
 
     const data = useMemo(() => {
         const now = new Date();
         const month = now.getMonth();
         const year = now.getFullYear();
 
-        const currentMonthTx = transactions.filter((tx) => {
+        // Filter transactions for specific month
+        let filteredTx = transactions.filter((tx) => {
             const d = new Date(tx.date);
             return d.getMonth() === month && d.getFullYear() === year;
         });
+
+        // Filter by account if specified
+        if (activeAccountId) {
+            filteredTx = filteredTx.filter(tx => tx.accountId === activeAccountId);
+        }
 
         let totalIncome = 0;
         let totalExpense = 0;
         const categoryTotals: Record<string, number> = {};
 
-        currentMonthTx.forEach((tx) => {
+        filteredTx.forEach((tx) => {
             if (tx.type === 'INCOME') {
                 totalIncome += tx.amount;
             } else {
@@ -54,16 +66,65 @@ export function Dashboard() {
             };
         });
 
+        // Calculate absolute balance for all accounts or specific one
+        let totalBalance = 0;
+        if (activeAccountId && activeAccount) {
+            // Balance = initial + all historical transactions for this account
+            const accountHistory = transactions.filter(tx => tx.accountId === activeAccountId);
+            const historySum = accountHistory.reduce((acc, tx) => 
+                tx.type === 'INCOME' ? acc + tx.amount : acc - tx.amount
+            , 0);
+            totalBalance = activeAccount.initialBalance + historySum;
+        } else {
+            // Global Balance = sum of initial balances + sum of all transactions
+            const initialSum = accounts.reduce((acc, a) => acc + a.initialBalance, 0);
+            const historySum = transactions.reduce((acc, tx) => 
+                tx.type === 'INCOME' ? acc + tx.amount : acc - tx.amount
+            , 0);
+            totalBalance = initialSum + historySum;
+        }
+
         return {
             totalIncome,
             totalExpense,
-            balance: totalIncome - totalExpense,
+            monthFlow: totalIncome - totalExpense,
+            totalBalance,
             expensesByCategory,
         };
-    }, [transactions, categories]);
+    }, [transactions, categories, accounts, activeAccountId, activeAccount]);
 
     return (
         <div className="space-y-6">
+            {/* Account Selector Horizontal Scroll */}
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+                <button
+                    onClick={() => setActiveAccountId(null)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all shrink-0 ${
+                        !activeAccountId 
+                            ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100' 
+                            : 'bg-white text-zinc-600 border-zinc-200 dark:bg-zinc-900/50 dark:text-zinc-400 dark:border-zinc-800 hover:border-zinc-300'
+                    }`}
+                >
+                    <Layers className="w-4 h-4" />
+                    <span className="text-sm font-semibold">Tous les comptes</span>
+                </button>
+                {accounts.map(acc => (
+                    <button
+                        key={acc.id}
+                        onClick={() => setActiveAccountId(acc.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all shrink-0 ${
+                            activeAccountId === acc.id 
+                                ? 'text-white border-transparent' 
+                                : 'bg-white text-zinc-600 border-zinc-200 dark:bg-zinc-900/50 dark:text-zinc-400 dark:border-zinc-800 hover:border-zinc-300'
+                        }`}
+                        style={activeAccountId === acc.id ? { backgroundColor: acc.color } : {}}
+                    >
+                        <CreditCard className="w-4 h-4" />
+                        <span className="text-sm font-semibold">{acc.name}</span>
+                    </button>
+                ))}
+            </div>
+
             <motion.div 
                 className="grid gap-4 md:grid-cols-3"
                 variants={{
@@ -77,23 +138,45 @@ export function Dashboard() {
                 animate="show"
             >
                 <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
-                    <Card className="text-zinc-50 border-0 overflow-hidden relative h-full" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%)', boxShadow: '0 8px 32px rgba(99,102,241,0.35)' }}>
+                    <Card 
+                        className="text-zinc-50 border-0 overflow-hidden relative h-full transition-all duration-500" 
+                        style={{ 
+                            background: activeAccount 
+                                ? `linear-gradient(135deg, ${activeAccount.color} 0%, ${activeAccount.color}dd 100%)`
+                                : 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%)', 
+                            boxShadow: activeAccount 
+                                ? `0 8px 32px ${activeAccount.color}40`
+                                : '0 8px 32px rgba(99,102,241,0.35)' 
+                        }}
+                    >
                         <div className="absolute right-0 top-0 opacity-[0.12] transform translate-x-4 -translate-y-4">
                             <Wallet className="w-32 h-32" />
                         </div>
                         <CardHeader className="pb-2 relative z-10 flex flex-row items-center justify-between space-y-0">
                             <CardTitle className="text-sm font-medium opacity-80 text-white">
-                                Solde Actuel
+                                {activeAccount ? `Solde ${activeAccount.name}` : 'Patrimoine Total'}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="relative z-10">
-                            <div className="flex items-baseline gap-2 mt-2 flex-wrap">
-                                <span className="text-3xl md:text-4xl font-black leading-none whitespace-nowrap">
-                                    {data.balance >= 0 ? '+' : '-'}{formatAmount(Math.abs(data.balance))}
+                            <AnimatePresence mode="wait">
+                                <motion.div 
+                                    key={activeAccountId || 'global'}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="flex items-baseline gap-2 mt-2 flex-wrap"
+                                >
+                                    <span className="text-3xl md:text-4xl font-black leading-none whitespace-nowrap">
+                                        {formatAmount(data.totalBalance)}
+                                    </span>
+                                    <span className="text-lg font-semibold opacity-80">{currency}</span>
+                                </motion.div>
+                            </AnimatePresence>
+                            <div className="flex items-center gap-1.5 mt-3">
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${data.monthFlow >= 0 ? 'bg-white/20' : 'bg-rose-500/20'}`}>
+                                    {data.monthFlow >= 0 ? '+' : ''}{formatAmount(data.monthFlow)} {currency} ce mois
                                 </span>
-                                <span className="text-lg font-semibold opacity-80">{currency}</span>
                             </div>
-                            <p className="text-sm opacity-60 mt-3 font-medium">Ce mois</p>
                         </CardContent>
                     </Card>
                 </motion.div>

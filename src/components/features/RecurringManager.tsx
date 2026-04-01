@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import React, { useState, type FormEvent } from 'react';
 import { useBudgetStore, type RecurringTransaction, type RecurringFrequency, type TransactionType } from '../../store/budgetStore';
 import { useAuth } from '../providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Dialog, DialogHeader, DialogTitle } from '../ui/Dialog';
-import { Repeat, Edit2, Trash2 } from 'lucide-react';
+import { Repeat, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 
 const FREQ_LABELS: Record<RecurringFrequency, string> = {
     weekly: 'Hebdomadaire',
@@ -108,24 +108,35 @@ export function RecurringManager() {
 function RecurringForm({ initialData, onSuccess, userId }: { initialData?: RecurringTransaction; onSuccess: () => void; userId: string }) {
     const addRecurring = useBudgetStore((s) => s.addRecurring);
     const editRecurring = useBudgetStore((s) => s.editRecurring);
-    const categories = useBudgetStore((s) => s.categories);
+    // Removed duplicate categories declaration here
 
     const [type, setType] = useState<TransactionType>(initialData?.type || 'EXPENSE');
     const [description, setDescription] = useState(initialData?.description || '');
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
     const [categoryId, setCategoryId] = useState(initialData?.categoryId || '');
+    const [accountId, setAccountId] = useState(initialData?.accountId || '');
     const [frequency, setFrequency] = useState<RecurringFrequency>(initialData?.frequency || 'monthly');
     const [nextDate, setNextDate] = useState(initialData?.nextDate || new Date().toISOString().split('T')[0]);
     const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
 
+    const categories = useBudgetStore((s) => s.categories);
+    const accounts = useBudgetStore((s) => s.accounts);
     const filteredCategories = categories.filter((c) => c.type === type);
+
+    // Auto-select first account if not set
+    React.useEffect(() => {
+        if (!accountId && accounts.length > 0) {
+            setAccountId(accounts[0].id);
+        }
+    }, [accounts, accountId]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (!description || !amount || !categoryId) return;
+        if (!description || !amount || !categoryId || !accountId) return;
 
         const data = {
             categoryId,
+            accountId,
             amount: parseFloat(amount),
             type,
             description,
@@ -141,6 +152,21 @@ function RecurringForm({ initialData, onSuccess, userId }: { initialData?: Recur
         }
         onSuccess();
     };
+
+    if (accounts.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Aucun compte trouvé</h3>
+                <p className="text-sm text-zinc-500 max-w-sm mb-4">
+                    Vous devez d'abord créer un compte avant d'ajouter une transaction récurrente.
+                </p>
+                <Button onClick={() => onSuccess()} variant="outline">Fermer</Button>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -173,6 +199,16 @@ function RecurringForm({ initialData, onSuccess, userId }: { initialData?: Recur
                         <option value="yearly">Annuel</option>
                     </Select>
                 </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Compte</label>
+                <Select value={accountId} onChange={(e) => setAccountId(e.target.value)} required>
+                    <option value="" disabled>Sélectionner un compte</option>
+                    {accounts.map((acc) => (
+                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                    ))}
+                </Select>
             </div>
 
             <div className="space-y-2">

@@ -14,6 +14,7 @@ export function RecentTransactions() {
     const deleteTransaction = useBudgetStore((state) => state.deleteTransaction);
     const categories = useBudgetStore((state) => state.categories);
     const currency = useBudgetStore((state) => state.currency);
+    const activeAccountId = useBudgetStore((state) => state.activeAccountId);
 
     const [editingTx, setEditingTx] = useState<Transaction | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -34,15 +35,16 @@ export function RecentTransactions() {
 
     const filteredTransactions = useMemo(() => {
         return transactions.filter(tx => {
+            const matchesAccount = !activeAccountId || tx.accountId === activeAccountId;
             const matchesSearch = tx.description.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesType = filterType === 'ALL' || tx.type === filterType;
             const matchesCategory = filterCategory === 'ALL' || tx.categoryId === filterCategory;
             const txDate = tx.date.slice(0, 10);
             const matchesStart = !startDate || txDate >= startDate;
             const matchesEnd = !endDate || txDate <= endDate;
-            return matchesSearch && matchesType && matchesCategory && matchesStart && matchesEnd;
+            return matchesAccount && matchesSearch && matchesType && matchesCategory && matchesStart && matchesEnd;
         });
-    }, [transactions, searchQuery, filterType, filterCategory, startDate, endDate]);
+    }, [transactions, activeAccountId, searchQuery, filterType, filterCategory, startDate, endDate]);
 
     const { tIncome, tExpense } = useMemo(() => {
         return filteredTransactions.reduce(

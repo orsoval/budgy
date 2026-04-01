@@ -9,12 +9,14 @@ import { CategoryManager } from './components/features/CategoryManager';
 import { RecentTransactions } from './components/features/RecentTransactions';
 import { ProfilePage } from './components/features/ProfilePage';
 import { RecurringManager } from './components/features/RecurringManager';
+import { AccountManager } from './components/features/AccountManager';
 import { useTheme } from './hooks/useTheme';
-import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft, PlusCircle, List, User } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft, PlusCircle, List, User, Landmark } from 'lucide-react';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRecurringOpen, setIsRecurringOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -99,6 +101,16 @@ function App() {
           >
             <FolderOpen className="w-5 h-5 shrink-0" />
             <span className={`whitespace-nowrap transition-all duration-300 ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>Catégories</span>
+          </button>
+
+          <button 
+            onClick={() => setIsAccountModalOpen(true)} 
+            onMouseEnter={(e) => handleMouseEnter(e, "Comptes")}
+            onMouseLeave={handleMouseLeave}
+            className={`w-full flex items-center gap-3 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white rounded-xl font-medium transition-all ${sidebarOpen ? 'px-4' : 'justify-center px-0'}`}
+          >
+            <Landmark className="w-5 h-5 shrink-0" />
+            <span className={`whitespace-nowrap transition-all duration-300 ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>Comptes</span>
           </button>
           
           <button 
@@ -294,6 +306,12 @@ function App() {
       <Dialog open={isRecurringOpen} onOpenChange={setIsRecurringOpen}>
         <div className="max-h-[80vh] overflow-y-auto w-full max-w-2xl sm:max-w-xl">
           <RecurringManager />
+        </div>
+      </Dialog>
+
+      <Dialog open={isAccountModalOpen} onOpenChange={setIsAccountModalOpen}>
+        <div className="max-h-[80vh] overflow-y-auto w-full max-w-2xl sm:max-w-xl">
+          <AccountManager />
         </div>
       </Dialog>
     </div>

@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 
+import { AlertTriangle } from 'lucide-react';
 import { type Transaction } from '../../store/budgetStore';
 import { useAuth } from '../providers/AuthProvider';
 
@@ -16,13 +17,22 @@ export function TransactionForm({ initialData, onSuccess }: TransactionFormProps
     const [type, setType] = useState<TransactionType>(initialData?.type || 'EXPENSE');
     const [amount, setAmount] = useState(initialData ? initialData.amount.toString() : '');
     const [categoryId, setCategoryId] = useState(initialData?.categoryId || '');
+    const [accountId, setAccountId] = useState(initialData?.accountId || '');
     const [description, setDescription] = useState(initialData?.description || '');
 
     const categories = useBudgetStore((state) => state.categories);
+    const accounts = useBudgetStore((state) => state.accounts);
     const addTransaction = useBudgetStore((state) => state.addTransaction);
     const editTransaction = useBudgetStore((state) => state.editTransaction);
     const currency = useBudgetStore((state) => state.currency);
     const { user } = useAuth();
+
+    // Auto-select first account if not set
+    React.useEffect(() => {
+        if (!accountId && accounts.length > 0) {
+            setAccountId(accounts[0].id);
+        }
+    }, [accounts, accountId]);
 
     const filteredCategories = categories.filter((c) => c.type === type);
 
@@ -35,12 +45,13 @@ export function TransactionForm({ initialData, onSuccess }: TransactionFormProps
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!amount || !categoryId || !description) return;
+        if (!amount || !categoryId || !accountId || !description) return;
 
         const txData = {
             type,
             amount: parseFloat(amount),
             categoryId,
+            accountId,
             description,
             date: initialData?.date || new Date().toISOString(),
         };
@@ -55,6 +66,21 @@ export function TransactionForm({ initialData, onSuccess }: TransactionFormProps
         setAmount('');
         setDescription('');
     };
+
+    if (accounts.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Aucun compte trouvé</h3>
+                <p className="text-sm text-zinc-500 max-w-sm mb-4">
+                    Vous devez d'abord créer un compte (ex: Compte Courant, Épargne) avant d'ajouter une transaction.
+                </p>
+                <Button onClick={() => onSuccess && onSuccess()} variant="outline">Fermer</Button>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -87,6 +113,20 @@ export function TransactionForm({ initialData, onSuccess }: TransactionFormProps
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="ex: 15.50"
                 />
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Compte</label>
+                <Select
+                    required
+                    value={accountId}
+                    onChange={(e) => setAccountId(e.target.value)}
+                >
+                    <option value="" disabled>Sélectionner un compte</option>
+                    {accounts.map((acc) => (
+                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                    ))}
+                </Select>
             </div>
 
             <div className="space-y-2">

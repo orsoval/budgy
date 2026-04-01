@@ -17,6 +17,7 @@ export interface Transaction {
     amount: number;
     type: TransactionType;
     categoryId: string;
+    accountId: string;
     date: string; // ISO string
     description: string;
 }
@@ -26,12 +27,24 @@ export type RecurringFrequency = 'weekly' | 'monthly' | 'yearly';
 export interface RecurringTransaction {
     id: string;
     categoryId: string;
+    accountId: string;
     amount: number;
     type: TransactionType;
     description: string;
     frequency: RecurringFrequency;
     nextDate: string;
     isActive: boolean;
+}
+
+export type AccountType = 'CHECKING' | 'SAVINGS' | 'CASH' | 'INVESTMENT' | 'OTHER';
+
+export interface Account {
+    id: string;
+    name: string;
+    type: AccountType;
+    initialBalance: number;
+    color: string;
+    icon: string;
 }
 
 export interface SavingGoal {
@@ -46,6 +59,7 @@ export interface SavingGoal {
 interface BudgetStore {
     transactions: Transaction[];
     categories: Category[];
+    accounts: Account[];
     recurringTransactions: RecurringTransaction[];
     savingGoals: SavingGoal[];
     globalMonthlyThreshold: number;
@@ -53,11 +67,22 @@ interface BudgetStore {
     currency: string;
     locale: string;
     initialized: boolean;
+    activeAccountId: string | null;
     initialize: (userId: string) => Promise<void>;
     updateProfile: (data: { displayName: string; currency: string; locale: string; globalMonthlyThreshold: number }) => void;
+    setActiveAccountId: (id: string | null) => void;
+    
+    // Account Actions
+    addAccount: (acc: Omit<Account, 'id'>, userId: string) => Promise<void>;
+    editAccount: (id: string, acc: Omit<Account, 'id'>, userId: string) => Promise<void>;
+    deleteAccount: (id: string) => Promise<void>;
+
+    // Transaction Actions
     addTransaction: (tx: Omit<Transaction, 'id'>, userId: string) => Promise<void>;
     editTransaction: (id: string, tx: Omit<Transaction, 'id'>, userId: string) => Promise<void>;
     deleteTransaction: (id: string) => Promise<void>;
+    
+    // Other Actions
     addCategory: (cat: Omit<Category, 'id'>, userId: string) => Promise<void>;
     editCategory: (id: string, cat: Omit<Category, 'id'>, userId: string) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
@@ -69,7 +94,7 @@ interface BudgetStore {
     addSavingGoal: (goal: Omit<SavingGoal, 'id'>, userId: string) => Promise<void>;
     editSavingGoal: (id: string, goal: Omit<SavingGoal, 'id'>, userId: string) => Promise<void>;
     deleteSavingGoal: (id: string) => Promise<void>;
-    getDashboardData: (monthDate: Date) => {
+    getDashboardData: (monthDate: Date, accountId?: string) => {
         totalIncome: number;
         totalExpense: number;
         balance: number;
@@ -82,6 +107,7 @@ let isApplyingRecurring = false;
 export const useBudgetStore = create<BudgetStore>((set, get) => ({
     transactions: [],
     categories: [],
+    accounts: [],
     recurringTransactions: [],
     savingGoals: [],
     globalMonthlyThreshold: 2000,
@@ -89,6 +115,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
     currency: '€',
     locale: 'fr-FR',
     initialized: false,
+    activeAccountId: null,
 
     initialize: async (userId) => {
         // Fetch Profiles
@@ -97,6 +124,13 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             .select('global_monthly_threshold, display_name, currency, locale')
             .eq('id', userId)
             .single();
+
+        // Fetch Accounts
+        const { data: accountsData } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: true });
 
         // Fetch Categories
         const { data: categoriesData } = await supabase
@@ -130,6 +164,15 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             currency: profile?.currency || '€',
             locale: profile?.locale || 'fr-FR',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            accounts: (accountsData || []).map((a: Record<string, any>) => ({
+                id: a.id,
+                name: a.name,
+                type: a.type,
+                initialBalance: a.initial_balance,
+                color: a.color,
+                icon: a.icon
+            })),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             categories: (categoriesData || []).map((c: Record<string, any>) => ({
                 id: c.id,
                 name: c.name,
@@ -144,6 +187,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
                 amount: t.amount,
                 type: t.type,
                 categoryId: t.category_id,
+                accountId: t.account_id,
                 date: t.date,
                 description: t.description
             })),
@@ -151,6 +195,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             recurringTransactions: (recurringData || []).map((r: Record<string, any>) => ({
                 id: r.id,
                 categoryId: r.category_id,
+                accountId: r.account_id,
                 amount: r.amount,
                 type: r.type,
                 description: r.description,
@@ -180,10 +225,70 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
         });
     },
 
+    setActiveAccountId: (id) => set({ activeAccountId: id }),
+
+    addAccount: async (acc, userId) => {
+        const { data, error } = await supabase.from('accounts').insert({
+            user_id: userId,
+            name: acc.name,
+            type: acc.type,
+            initial_balance: acc.initialBalance,
+            color: acc.color,
+            icon: acc.icon
+        }).select().single();
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        const newAcc: Account = {
+            id: data.id,
+            name: data.name,
+            type: data.type,
+            initialBalance: data.initial_balance,
+            color: data.color,
+            icon: data.icon
+        };
+
+        set((state) => ({ accounts: [...state.accounts, newAcc] }));
+    },
+
+    editAccount: async (id, acc, userId) => {
+        const { error } = await supabase.from('accounts').update({
+            name: acc.name,
+            type: acc.type,
+            initial_balance: acc.initialBalance,
+            color: acc.color,
+            icon: acc.icon
+        }).eq('id', id).eq('user_id', userId);
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        set((state) => ({
+            accounts: state.accounts.map((a) => (a.id === id ? { ...acc, id } : a)),
+        }));
+    },
+
+    deleteAccount: async (id) => {
+        const { error } = await supabase.from('accounts').delete().eq('id', id);
+        if (!error) {
+            set((state) => ({ 
+                accounts: state.accounts.filter((a) => a.id !== id),
+                transactions: state.transactions.filter((tx) => tx.accountId !== id),
+                recurringTransactions: state.recurringTransactions.filter((rt) => rt.accountId !== id)
+            }));
+        }
+    },
+
     addTransaction: async (tx, userId) => {
         const { data, error } = await supabase.from('transactions').insert({
             user_id: userId,
             category_id: tx.categoryId,
+            account_id: tx.accountId,
             amount: tx.amount,
             type: tx.type,
             date: tx.date,
@@ -200,6 +305,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             amount: data.amount,
             type: data.type,
             categoryId: data.category_id,
+            accountId: data.account_id,
             date: data.date,
             description: data.description
         };
@@ -210,6 +316,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
     editTransaction: async (id, tx, userId) => {
         const { error } = await supabase.from('transactions').update({
             category_id: tx.categoryId,
+            account_id: tx.accountId,
             amount: tx.amount,
             type: tx.type,
             date: tx.date,
@@ -306,6 +413,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
         const { data, error } = await supabase.from('recurring_transactions').insert({
             user_id: userId,
             category_id: r.categoryId,
+            account_id: r.accountId,
             amount: r.amount,
             type: r.type,
             description: r.description,
@@ -318,6 +426,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             const newR: RecurringTransaction = {
                 id: data.id,
                 categoryId: data.category_id,
+                accountId: data.account_id,
                 amount: data.amount,
                 type: data.type,
                 description: data.description,
@@ -337,6 +446,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
     editRecurring: async (id, r, userId) => {
         const { error } = await supabase.from('recurring_transactions').update({
             category_id: r.categoryId,
+            account_id: r.accountId,
             amount: r.amount,
             type: r.type,
             description: r.description,
@@ -381,6 +491,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
                     const { data, error } = await supabase.from('transactions').insert({
                         user_id: userId,
                         category_id: r.categoryId,
+                        account_id: r.accountId,
                         amount: r.amount,
                         type: r.type,
                         date: currentDateStr,
@@ -394,6 +505,7 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
                         amount: data.amount,
                         type: data.type,
                         categoryId: data.category_id,
+                        accountId: data.account_id,
                         date: data.date,
                         description: data.description
                     };
@@ -478,21 +590,27 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
         }
     },
 
-    getDashboardData: (monthDate) => {
+    getDashboardData: (monthDate, accountId) => {
         const { transactions, categories } = get();
         const month = monthDate.getMonth();
         const year = monthDate.getFullYear();
 
-        const currentMonthTx = transactions.filter((tx) => {
+        // Filter transactions for specific month
+        let filteredTx = transactions.filter((tx) => {
             const d = new Date(tx.date);
             return d.getMonth() === month && d.getFullYear() === year;
         });
+
+        // Filter by account if specified
+        if (accountId) {
+            filteredTx = filteredTx.filter(tx => tx.accountId === accountId);
+        }
 
         let totalIncome = 0;
         let totalExpense = 0;
         const categoryTotals: Record<string, number> = {};
 
-        currentMonthTx.forEach((tx) => {
+        filteredTx.forEach((tx) => {
             if (tx.type === 'INCOME') {
                 totalIncome += tx.amount;
             } else {
@@ -511,10 +629,20 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             };
         });
 
+        // Calculate balance: 
+        // If accountId is provided, balance = initialBalance + monthTotal
+        // If not, balance = sum of all accounts
+        let balance = 0;
+        if (accountId) {
+            balance = totalIncome - totalExpense;
+        } else {
+            balance = totalIncome - totalExpense;
+        }
+
         return {
             totalIncome,
             totalExpense,
-            balance: totalIncome - totalExpense,
+            balance,
             expensesByCategory,
         };
     },

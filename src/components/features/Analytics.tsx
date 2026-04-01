@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useBudgetStore } from '../../store/budgetStore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, CalendarDays } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, CalendarDays, Landmark } from 'lucide-react';
 import CountUp from 'react-countup';
 const formatCurrency = (value: number, currency: string) => {
     return new Intl.NumberFormat('fr-FR', { style: 'decimal' }).format(value) + ' ' + currency;
@@ -10,14 +10,15 @@ const formatCurrency = (value: number, currency: string) => {
 export const Analytics: React.FC = () => {
     const currentYear = new Date().getFullYear();
     const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
     
-    const activeAccountId = useBudgetStore((state) => state.activeAccountId);
+    const accounts = useBudgetStore((state) => state.accounts);
     const getYearlyData = useBudgetStore((state) => state.getYearlyData);
     const currency = useBudgetStore((state) => state.currency);
 
     const { yearlyIncome, yearlyExpense, monthlyData } = useMemo(() => {
-        return getYearlyData(selectedYear, activeAccountId || undefined);
-    }, [selectedYear, activeAccountId, getYearlyData]);
+        return getYearlyData(selectedYear, selectedAccountId || undefined);
+    }, [selectedYear, selectedAccountId, getYearlyData]);
 
     const balance = yearlyIncome - yearlyExpense;
 
@@ -67,17 +68,32 @@ export const Analytics: React.FC = () => {
                     </p>
                 </div>
                 
-                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                    <CalendarDays className="w-4 h-4 text-zinc-400 ml-2" />
-                    <select
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(Number(e.target.value))}
-                        className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pr-8"
-                    >
-                        {years.map(year => (
-                            <option key={year} value={year}>{year}</option>
-                        ))}
-                    </select>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                        <Landmark className="w-4 h-4 text-zinc-400 ml-2" />
+                        <select
+                            value={selectedAccountId || ''}
+                            onChange={(e) => setSelectedAccountId(e.target.value || null)}
+                            className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pr-8"
+                        >
+                            <option value="">Tous les comptes</option>
+                            {accounts.map(acc => (
+                                <option key={acc.id} value={acc.id}>{acc.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                        <CalendarDays className="w-4 h-4 text-zinc-400 ml-2" />
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pr-8"
+                        >
+                            {years.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 

@@ -10,8 +10,9 @@ import { RecentTransactions } from './components/features/RecentTransactions';
 import { ProfilePage } from './components/features/ProfilePage';
 import { RecurringManager } from './components/features/RecurringManager';
 import { AccountManager } from './components/features/AccountManager';
+import { Analytics } from './components/features/Analytics';
 import { useTheme } from './hooks/useTheme';
-import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft, PlusCircle, List, User, Landmark } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft, PlusCircle, List, User, Landmark, BarChart2 } from 'lucide-react';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,7 +21,7 @@ function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRecurringOpen, setIsRecurringOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileTab, setMobileTab] = useState<'dashboard' | 'transactions'>('dashboard');
+  const [mobileTab, setMobileTab] = useState<'dashboard' | 'transactions' | 'analytics'>('dashboard');
   
   const [tooltip, setTooltip] = useState<{ text: string, y: number } | null>(null);
 
@@ -84,12 +85,23 @@ function App() {
         <nav className="flex-1 py-6 px-4 space-y-2 overflow-x-hidden overflow-y-auto">
           <p className={`px-3 text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 transition-opacity ${sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>Principal</p>
           <button 
+            onClick={() => setMobileTab('dashboard')}
             onMouseEnter={(e) => handleMouseEnter(e, "Tableau de bord")}
             onMouseLeave={handleMouseLeave}
-            className={`w-full flex items-center gap-3 py-3 bg-primary/10 dark:bg-primary/20 text-primary dark:text-white rounded-xl font-medium transition-all shadow-[0_0_15px_rgba(108,92,231,0.15)] ${sidebarOpen ? 'px-4' : 'justify-center px-0'}`}
+            className={`w-full flex items-center gap-3 py-3 ${mobileTab === 'dashboard' ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-white shadow-[0_0_15px_rgba(108,92,231,0.15)]' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white'} rounded-xl font-medium transition-all ${sidebarOpen ? 'px-4' : 'justify-center px-0'}`}
           >
-            <LayoutDashboard className="w-5 h-5 text-primary shrink-0" />
+            <LayoutDashboard className={`w-5 h-5 shrink-0 ${mobileTab === 'dashboard' ? 'text-primary' : ''}`} />
             <span className={`whitespace-nowrap transition-all duration-300 ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>Tableau de bord</span>
+          </button>
+
+          <button 
+            onClick={() => setMobileTab('analytics')}
+            onMouseEnter={(e) => handleMouseEnter(e, "Analyses")}
+            onMouseLeave={handleMouseLeave}
+            className={`w-full flex items-center gap-3 py-3 ${mobileTab === 'analytics' ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-white shadow-[0_0_15px_rgba(108,92,231,0.15)]' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white'} rounded-xl font-medium transition-all ${sidebarOpen ? 'px-4' : 'justify-center px-0'}`}
+          >
+            <BarChart2 className={`w-5 h-5 shrink-0 ${mobileTab === 'analytics' ? 'text-primary' : ''}`} />
+            <span className={`whitespace-nowrap transition-all duration-300 ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>Analyses</span>
           </button>
 
           <p className={`px-3 text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3 mt-8 transition-opacity ${sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>Gestion</p>
@@ -207,12 +219,18 @@ function App() {
             </div>
 
             <div className="space-y-6">
-              <div className={mobileTab === 'transactions' ? 'hidden md:block' : 'block'}>
-                <Dashboard />
-              </div>
-              <div className={mobileTab === 'dashboard' ? 'hidden md:block' : 'block'}>
-                <RecentTransactions />
-              </div>
+              {mobileTab !== 'analytics' ? (
+                <>
+                  <div className={mobileTab === 'transactions' ? 'hidden md:block' : 'block'}>
+                    <Dashboard />
+                  </div>
+                  <div className={mobileTab === 'dashboard' ? 'hidden md:block' : 'block'}>
+                    <RecentTransactions />
+                  </div>
+                </>
+              ) : (
+                <Analytics />
+              )}
             </div>
 
             <footer className="py-6 mt-12 border-t border-zinc-200 dark:border-zinc-800">
@@ -261,6 +279,17 @@ function App() {
             >
               <PlusCircle className="w-7 h-7" />
             </div>
+          </button>
+
+          {/* Analytics Mobile */}
+          <button
+            onClick={() => setMobileTab('analytics')}
+            className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all ${
+              mobileTab === 'analytics' ? 'text-primary' : 'text-zinc-400 dark:text-zinc-500'
+            }`}
+          >
+            <BarChart2 className={`w-5 h-5 transition-transform ${mobileTab === 'analytics' ? 'scale-110' : ''}`} />
+            <span className="text-[10px] font-medium">Analyses</span>
           </button>
 
           {/* Catégories */}

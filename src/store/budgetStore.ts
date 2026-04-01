@@ -100,6 +100,11 @@ interface BudgetStore {
         balance: number;
         expensesByCategory: { categoryId: string; amount: number; name: string; color: string }[];
     };
+    getYearlyData: (year: number, accountId?: string) => {
+        yearlyIncome: number;
+        yearlyExpense: number;
+        monthlyData: { month: string; income: number; expense: number }[];
+    };
 }
 
 let isApplyingRecurring = false;
@@ -645,5 +650,33 @@ export const useBudgetStore = create<BudgetStore>((set, get) => ({
             balance,
             expensesByCategory,
         };
+    },
+
+    getYearlyData: (year, accountId) => {
+        const { transactions } = get();
+        let filteredTx = transactions.filter((tx) => new Date(tx.date).getFullYear() === year);
+        
+        if (accountId) {
+            filteredTx = filteredTx.filter((tx) => tx.accountId === accountId);
+        }
+
+        let yearlyIncome = 0;
+        let yearlyExpense = 0;
+        
+        const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        const monthlyData = monthNames.map(month => ({ month, income: 0, expense: 0 }));
+
+        filteredTx.forEach((tx) => {
+            const m = new Date(tx.date).getMonth();
+            if (tx.type === 'INCOME') {
+                yearlyIncome += tx.amount;
+                monthlyData[m].income += tx.amount;
+            } else {
+                yearlyExpense += tx.amount;
+                monthlyData[m].expense += tx.amount;
+            }
+        });
+
+        return { yearlyIncome, yearlyExpense, monthlyData };
     },
 }));

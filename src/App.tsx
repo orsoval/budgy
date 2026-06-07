@@ -11,8 +11,9 @@ import { ProfilePage } from './components/features/ProfilePage';
 import { RecurringManager } from './components/features/RecurringManager';
 import { AccountManager } from './components/features/AccountManager';
 import { Analytics } from './components/features/Analytics';
+import { TransactionsPage } from './components/features/TransactionsPage';
 import { useTheme } from './hooks/useTheme';
-import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft, PlusCircle, List, User, Landmark, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Repeat, PanelLeftClose, PanelLeft, PlusCircle, List, User, Landmark, BarChart2, ArrowLeftRight } from 'lucide-react';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,6 +93,16 @@ function App() {
           >
             <LayoutDashboard className={`w-5 h-5 shrink-0 ${mobileTab === 'dashboard' ? 'text-primary' : ''}`} />
             <span className={`whitespace-nowrap transition-all duration-300 ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>Tableau de bord</span>
+          </button>
+
+          <button 
+            onClick={() => setMobileTab('transactions')}
+            onMouseEnter={(e) => handleMouseEnter(e, "Transactions")}
+            onMouseLeave={handleMouseLeave}
+            className={`w-full flex items-center gap-3 py-3 ${mobileTab === 'transactions' ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-white shadow-[0_0_15px_rgba(108,92,231,0.15)]' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white'} rounded-xl font-medium transition-all ${sidebarOpen ? 'px-4' : 'justify-center px-0'}`}
+          >
+            <ArrowLeftRight className={`w-5 h-5 shrink-0 ${mobileTab === 'transactions' ? 'text-primary' : ''}`} />
+            <span className={`whitespace-nowrap transition-all duration-300 ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>Transactions</span>
           </button>
 
           <button 
@@ -219,16 +230,16 @@ function App() {
             </div>
 
             <div className="space-y-6">
-              {mobileTab !== 'analytics' ? (
+              {mobileTab === 'dashboard' && (
                 <>
-                  <div className={mobileTab === 'transactions' ? 'hidden md:block' : 'block'}>
-                    <Dashboard />
-                  </div>
-                  <div className={mobileTab === 'dashboard' ? 'hidden md:block' : 'block'}>
-                    <RecentTransactions />
-                  </div>
+                  <Dashboard />
+                  <RecentTransactions onViewAll={() => setMobileTab('transactions')} />
                 </>
-              ) : (
+              )}
+              {mobileTab === 'transactions' && (
+                <TransactionsPage />
+              )}
+              {mobileTab === 'analytics' && (
                 <Analytics />
               )}
             </div>

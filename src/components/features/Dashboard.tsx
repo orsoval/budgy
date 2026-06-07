@@ -139,21 +139,16 @@ export function Dashboard() {
             >
                 <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
                     <Card 
-                        className="text-zinc-50 border-0 overflow-hidden relative h-full transition-all duration-500" 
+                        className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden relative h-full transition-all duration-500 border-l-[4px]" 
                         style={{ 
-                            background: activeAccount 
-                                ? `linear-gradient(135deg, ${activeAccount.color} 0%, ${activeAccount.color}dd 100%)`
-                                : 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%)', 
-                            boxShadow: activeAccount 
-                                ? `0 8px 32px ${activeAccount.color}40`
-                                : '0 8px 32px rgba(99,102,241,0.35)' 
+                            borderLeftColor: activeAccount ? activeAccount.color : '#6366f1'
                         }}
                     >
-                        <div className="absolute right-0 top-0 opacity-[0.12] transform translate-x-4 -translate-y-4">
+                        <div className="absolute right-0 top-0 opacity-5 dark:opacity-[0.02] transform translate-x-4 -translate-y-4 text-zinc-900 dark:text-zinc-100">
                             <Wallet className="w-32 h-32" />
                         </div>
                         <CardHeader className="pb-2 relative z-10 flex flex-row items-center justify-between space-y-0">
-                            <CardTitle className="text-sm font-medium opacity-80 text-white">
+                            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
                                 {activeAccount ? `Solde ${activeAccount.name}` : 'Patrimoine Total'}
                             </CardTitle>
                         </CardHeader>
@@ -166,14 +161,14 @@ export function Dashboard() {
                                     exit={{ opacity: 0, y: -10 }}
                                     className="flex items-baseline gap-2 mt-2 flex-wrap"
                                 >
-                                    <span className="text-3xl md:text-4xl font-black leading-none whitespace-nowrap">
+                                    <span className="text-3xl md:text-4xl font-black leading-none whitespace-nowrap tabular-nums text-zinc-900 dark:text-zinc-100">
                                         {formatAmount(data.totalBalance)}
                                     </span>
-                                    <span className="text-lg font-semibold opacity-80">{currency}</span>
+                                    <span className="text-lg font-semibold text-zinc-400 dark:text-zinc-500">{currency}</span>
                                 </motion.div>
                             </AnimatePresence>
                             <div className="flex items-center gap-1.5 mt-3">
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${data.monthFlow >= 0 ? 'bg-white/20' : 'bg-rose-500/20'}`}>
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${data.monthFlow >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
                                     {data.monthFlow >= 0 ? '+' : ''}{formatAmount(data.monthFlow)} {currency} ce mois
                                 </span>
                             </div>
@@ -182,7 +177,7 @@ export function Dashboard() {
                 </motion.div>
 
                 <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
-                    <Card className="h-full bg-white dark:bg-card">
+                    <Card className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 border-l-[3px] border-l-success">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Revenus</CardTitle>
                             <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
@@ -191,7 +186,7 @@ export function Dashboard() {
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-baseline gap-2 mt-2 flex-wrap">
-                                <span className="text-3xl md:text-4xl font-black leading-none text-success whitespace-nowrap">+{formatAmount(data.totalIncome)}</span>
+                                <span className="text-3xl md:text-4xl font-black leading-none text-success whitespace-nowrap tabular-nums">+{formatAmount(data.totalIncome)}</span>
                                 <span className="text-lg font-semibold text-success opacity-80">{currency}</span>
                             </div>
                         </CardContent>
@@ -199,7 +194,7 @@ export function Dashboard() {
                 </motion.div>
 
                 <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } }}>
-                    <Card className="h-full bg-white dark:bg-card">
+                    <Card className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 border-l-[3px] border-l-danger">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Dépenses</CardTitle>
                             <div className="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center">
@@ -208,7 +203,7 @@ export function Dashboard() {
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-baseline gap-2 mt-2 flex-wrap">
-                                <span className="text-3xl md:text-4xl font-black leading-none text-danger whitespace-nowrap">-{formatAmount(data.totalExpense)}</span>
+                                <span className="text-3xl md:text-4xl font-black leading-none text-danger whitespace-nowrap tabular-nums">-{formatAmount(data.totalExpense)}</span>
                                 <span className="text-lg font-semibold text-danger opacity-80">{currency}</span>
                             </div>
                         </CardContent>
@@ -249,12 +244,12 @@ export function Dashboard() {
                             return (
                                 <motion.div 
                                     key={cat.id} 
-                                    className={`space-y-3 p-4 rounded-2xl border transition-colors ${
+                                    className={`space-y-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors border-l-[3px] ${
                                         isOverBudget 
-                                            ? 'border-rose-200 dark:border-rose-900/50 bg-rose-50/60 dark:bg-rose-900/10' 
+                                            ? 'border-l-rose-500' 
                                             : isWarning 
-                                                ? 'border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-900/10' 
-                                                : 'border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]'
+                                                ? 'border-l-amber-500' 
+                                                : 'border-l-transparent'
                                     }`}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -274,8 +269,8 @@ export function Dashboard() {
                                             </div>
                                         </div>
                                         <div className="text-left sm:text-right flex items-baseline gap-1">
-                                            <span className={`font-bold ${ isOverBudget ? 'text-rose-600 dark:text-rose-400' : isWarning ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-900 dark:text-zinc-100' }`}>{formatAmount(expenseForCat)}</span>
-                                            <span className="text-zinc-400 text-xs">/ {formatAmount(cat.monthlyThreshold)} {currency}</span>
+                                            <span className={`font-bold tabular-nums ${ isOverBudget ? 'text-rose-600 dark:text-rose-400' : isWarning ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-900 dark:text-zinc-100' }`}>{formatAmount(expenseForCat)}</span>
+                                            <span className="text-zinc-400 text-xs tabular-nums">/ {formatAmount(cat.monthlyThreshold)} {currency}</span>
                                         </div>
                                     </div>
                                     <Progress

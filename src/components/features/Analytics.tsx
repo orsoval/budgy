@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useBudgetStore } from '../../store/budgetStore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, CalendarDays, Landmark } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, CalendarDays, Landmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import CountUp from 'react-countup';
 const formatCurrency = (value: number, currency: string) => {
     return new Intl.NumberFormat('fr-FR', { style: 'decimal' }).format(value) + ' ' + currency;
@@ -74,6 +74,7 @@ export const Analytics: React.FC = () => {
                         <select
                             value={selectedAccountId || ''}
                             onChange={(e) => setSelectedAccountId(e.target.value || null)}
+                            aria-label="Sélectionner le compte"
                             className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pr-8"
                         >
                             <option value="">Tous les comptes</option>
@@ -82,66 +83,111 @@ export const Analytics: React.FC = () => {
                             ))}
                         </select>
                     </div>
-                    <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                        <CalendarDays className="w-4 h-4 text-zinc-400 ml-2" />
-                        <select
-                            value={selectedYear}
-                            onChange={(e) => setSelectedYear(Number(e.target.value))}
-                            className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pr-8"
+                    <div className="flex items-center bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                        <button 
+                            onClick={() => setSelectedYear(y => Math.max(years[0], y - 1))}
+                            disabled={selectedYear === years[0]}
+                            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 disabled:opacity-50 transition-colors"
+                            aria-label="Année précédente"
                         >
-                            {years.map(year => (
-                                <option key={year} value={year}>{year}</option>
-                            ))}
-                        </select>
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <div className="flex items-center px-2 border-x border-zinc-200 dark:border-zinc-800">
+                            <CalendarDays className="w-4 h-4 text-zinc-400 mr-2" />
+                            <select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                aria-label="Sélectionner l'année"
+                                className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pr-6 py-1.5"
+                            >
+                                {years.map(year => (
+                                    <option key={year} value={year}>{year}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <button 
+                            onClick={() => setSelectedYear(y => Math.min(years[years.length - 1], y + 1))}
+                            disabled={selectedYear === years[years.length - 1]}
+                            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 disabled:opacity-50 transition-colors"
+                            aria-label="Année suivante"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             </div>
 
             {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Revenus Annuels</p>
-                        <div className="p-2 bg-emerald-500/10 rounded-full">
-                            <ArrowUpRight className="w-4 h-4 text-emerald-500" />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                <div className="bg-white dark:bg-zinc-900 p-4 md:p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                        <p className="text-xs md:text-sm font-medium text-zinc-500 dark:text-zinc-400">Revenus Annuels</p>
+                        <div className="p-1.5 md:p-2 bg-emerald-500/10 rounded-full">
+                            <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-emerald-500" />
                         </div>
                     </div>
-                    <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                    <p className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tabular-nums">
                         <CountUp end={yearlyIncome} duration={1} separator=" " decimals={2} />
-                        <span className="ml-1 text-lg">{currency}</span>
+                        <span className="ml-1 text-sm md:text-lg">{currency}</span>
                     </p>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Dépenses Annuelles</p>
-                        <div className="p-2 bg-red-500/10 rounded-full">
-                            <ArrowDownRight className="w-4 h-4 text-red-500" />
+                <div className="bg-white dark:bg-zinc-900 p-4 md:p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                        <p className="text-xs md:text-sm font-medium text-zinc-500 dark:text-zinc-400">Dépenses Annuelles</p>
+                        <div className="p-1.5 md:p-2 bg-red-500/10 rounded-full">
+                            <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
                         </div>
                     </div>
-                    <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                    <p className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tabular-nums">
                         <CountUp end={yearlyExpense} duration={1} separator=" " decimals={2} />
-                        <span className="ml-1 text-lg">{currency}</span>
+                        <span className="ml-1 text-sm md:text-lg">{currency}</span>
                     </p>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Bilan Annuel</p>
-                        <div className={`p-2 rounded-full ${balance >= 0 ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
-                            <TrendingUp className={`w-4 h-4 ${balance >= 0 ? 'text-emerald-500' : 'text-red-500'}`} />
+                <div className="bg-white dark:bg-zinc-900 p-4 md:p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 col-span-2 md:col-span-1">
+                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                        <p className="text-xs md:text-sm font-medium text-zinc-500 dark:text-zinc-400">Bilan Annuel</p>
+                        <div className={`p-1.5 md:p-2 rounded-full ${balance >= 0 ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
+                            <TrendingUp className={`w-3 h-3 md:w-4 md:h-4 ${balance >= 0 ? 'text-emerald-500' : 'text-red-500'}`} />
                         </div>
                     </div>
-                    <p className={`text-2xl font-bold ${balance >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                    <p className={`text-xl md:text-2xl font-bold tabular-nums ${balance >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                         <CountUp end={balance} duration={1} separator=" " decimals={2} />
-                        <span className="ml-1 text-lg">{currency}</span>
+                        <span className="ml-1 text-sm md:text-lg">{currency}</span>
                     </p>
                 </div>
             </div>
 
             {/* Chart */}
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
                 <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-6">Évolution mensuelle</h3>
+                
+                {/* Screen reader table alternative */}
+                <div className="sr-only">
+                    <h4>Données mensuelles de l'année {selectedYear}</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mois</th>
+                                <th>Revenus</th>
+                                <th>Dépenses</th>
+                                <th>Bilan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {monthlyData.map((d) => (
+                                <tr key={d.month}>
+                                    <td>{d.month}</td>
+                                    <td>{formatCurrency(d.income, currency)}</td>
+                                    <td>{formatCurrency(d.expense, currency)}</td>
+                                    <td>{formatCurrency(d.income - d.expense, currency)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
                 <div className="h-[400px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -169,25 +215,26 @@ export const Analytics: React.FC = () => {
                                 iconType="circle"
                                 formatter={(value) => <span className="text-zinc-600 dark:text-zinc-400 text-sm ml-1">{value}</span>}
                             />
-                            <Bar dataKey="income" name="Revenus" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                            <Bar dataKey="expense" name="Dépenses" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                            <Bar dataKey="income" name="Revenus" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                            <Bar dataKey="expense" name="Dépenses" fill="hsl(var(--danger))" radius={[4, 4, 0, 0]} maxBarSize={40} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
             </div>
 
             {/* Best / Worst months info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {bestMonth && bestMonth.saved > 0 && (
-                    <div className="bg-gradient-to-br from-emerald-500/5 to-transparent p-5 rounded-2xl border border-emerald-500/20">
-                        <div className="flex items-center gap-3">
+                    <div className="bg-white dark:bg-zinc-900 p-4 md:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+                        <div className="flex items-center gap-3 pl-2">
                             <div className="p-2 bg-emerald-500/10 rounded-full">
                                 <TrendingUp className="w-4 h-4 text-emerald-500" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Meilleur mois d'épargne</p>
-                                <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                                    {bestMonth.month} <span className="text-emerald-500 font-bold">+{formatCurrency(bestMonth.saved, currency)}</span>
+                                <p className="text-xs md:text-sm font-medium text-zinc-500 dark:text-zinc-400">Meilleur mois d'épargne</p>
+                                <p className="font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">
+                                    {bestMonth.month} <span className="text-emerald-500 font-bold ml-1">+{formatCurrency(bestMonth.saved, currency)}</span>
                                 </p>
                             </div>
                         </div>
@@ -195,15 +242,16 @@ export const Analytics: React.FC = () => {
                 )}
                 
                 {worstMonth && worstMonth.saved < 0 && (
-                    <div className="bg-gradient-to-br from-red-500/5 to-transparent p-5 rounded-2xl border border-red-500/20">
-                        <div className="flex items-center gap-3">
+                    <div className="bg-white dark:bg-zinc-900 p-4 md:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+                        <div className="flex items-center gap-3 pl-2">
                             <div className="p-2 bg-red-500/10 rounded-full">
                                 <TrendingUp className="w-4 h-4 text-red-500 transform rotate-180" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Pire mois (déficit)</p>
-                                <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                                    {worstMonth.month} <span className="text-red-500 font-bold">{formatCurrency(worstMonth.saved, currency)}</span>
+                                <p className="text-xs md:text-sm font-medium text-zinc-500 dark:text-zinc-400">Pire mois (déficit)</p>
+                                <p className="font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">
+                                    {worstMonth.month} <span className="text-red-500 font-bold ml-1">{formatCurrency(worstMonth.saved, currency)}</span>
                                 </p>
                             </div>
                         </div>

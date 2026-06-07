@@ -64,7 +64,7 @@ export function AccountManager() {
                                             <p className="font-medium text-sm text-zinc-900 dark:text-zinc-50">
                                                 {acc.name} <span className="text-[10px] text-zinc-400 ml-2 uppercase tracking-wide">({ACCOUNT_LABELS[acc.type]})</span>
                                             </p>
-                                            <p className="text-xs text-zinc-500">
+                                            <p className="text-xs text-zinc-500 tabular-nums">
                                                 Solde initial: {acc.initialBalance} {currency}
                                             </p>
                                         </div>
@@ -72,7 +72,7 @@ export function AccountManager() {
                                     <div className="flex items-center opacity-100 sm:opacity-50 sm:group-hover:opacity-100 transition-opacity mt-2 sm:mt-0 gap-1">
                                         <button 
                                             onClick={() => setEditingAcc(acc)}
-                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
                                             title="Éditer"
                                         >
                                             <Edit2 className="w-4 h-4" />

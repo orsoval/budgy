@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-07T12:08:00Z",
+  "title": "Design System: Budgy",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Electric Trust Indigo", "canonical": "oklch(60.1% 0.19 285.3)", "tonalRamp": ["#13103c", "#282173", "#4337b5", "#7364E3", "#9d93eb", "#c3bef3", "#e6e4fb", "#f6f5fe"] },
+      "foreground": { "role": "neutral", "displayName": "Vault Foreground", "canonical": "oklch(12.3% 0.02 284.1)", "tonalRamp": ["#020205", "#0F0F1A", "#1e1e31", "#3d3d54", "#6d6d87", "#a2a2ba", "#d5d5e3", "#f4f4f7"] },
+      "background": { "role": "neutral", "displayName": "Mist Background", "canonical": "oklch(96.9% 0.015 282.8)", "tonalRamp": ["#0b0d1a", "#1b203e", "#3a4481", "#6876c5", "#9ba6de", "#c8ceef", "#F5F6FF", "#fafaff"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headlines, main balance figures, and page titles." },
+      "body": { "displayName": "Body", "purpose": "Paragraphs, transaction list details, and main explanations." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-out-quint", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Subtle, smooth transition for interactive hover states and page load effects." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main call to action button for submitting transactions or initiating flows.",
+      "html": "<button class=\"ds-btn-primary\">Add Transaction</button>",
+      "css": ".ds-btn-primary { background: #7364E3; color: #FFFFFF; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-primary:hover { background: #5a4cc2; } .ds-btn-primary:focus-visible { outline: 2px solid #7364E3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Card Container",
+      "kind": "card",
+      "description": "Default flat container with clean 1px border for widgets and sections.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Savings Goal</h3><p class=\"ds-card-desc\">Tracking progress for new laptop.</p></div>",
+      "css": ".ds-card { background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 12px; padding: 24px; font-family: 'Inter', sans-serif; } .ds-card-title { margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #0F0F1A; } .ds-card-desc { margin: 0; font-size: 14px; color: #71717A; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Mindful Vault",
+    "overview": "The design of Budgy revolves around the metaphor of a modern, clean vault—a safe, silent place where financial data is tracked with absolute precision, clarity, and zero visual noise. By eliminating distracting backgrounds, flashy gradients, and heavy shadows, the system fosters a sense of composure, security, and calm.",
+    "keyCharacteristics": [
+      "Minimalist, high-density layouts that prioritize data readability.",
+      "Clear structural borders (1px) for container separation.",
+      "Tabular numeric alignment for easily scannable balances and transactions.",
+      "Highly readable typography utilizing the Inter font stack."
+    ],
+    "rules": [
+      { "name": "The Minimal Accent Rule", "body": "Primary indigo is reserved strictly for interactive states, navigation targets, and focus actions. It must not exceed 10% of any given screen layout.", "section": "colors" },
+      { "name": "The Tabular Numbers Rule", "body": "All financial amounts, transaction dates, and balances must use font-variant-numeric: tabular-nums to ensure perfect column alignment.", "section": "typography" },
+      { "name": "The Shadow Prohibition", "body": "Box shadows are prohibited on cards, badges, and containers. They are reserved exclusively for temporary floating UI elements (such as select menus, active tooltips, or open dialog overlays).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do align all numerical data columns using tabular numbers.",
+      "Do use exact 1px solid borders for container boundaries.",
+      "Do maintain high contrast with a minimum of 4.5:1 for body copy."
+    ],
+    "donts": [
+      "Don't use decorative gradients on backgrounds or text.",
+      "Don't use drop shadows for standard dashboard cards or containers.",
+      "Don't nest cards inside other cards; use simple lists or thin dividers instead.",
+      "Don't use all-caps for body text or large labels."
+    ]
+  }
+}

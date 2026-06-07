@@ -68,14 +68,14 @@ export function TransactionsPage() {
         const category = categories.find(c => c.id === tx.categoryId);
         const account = accounts.find(a => a.id === tx.accountId);
         
-        const bgClass = isIncome 
-            ? "border-success/10 bg-success/5 hover:bg-success/10 dark:border-success/20 dark:bg-success/[0.03] dark:hover:bg-success/[0.08]"
-            : "border-danger/10 bg-danger/5 hover:bg-danger/10 dark:border-danger/20 dark:bg-danger/[0.03] dark:hover:bg-danger/[0.08]";
+        const borderClass = isIncome 
+            ? "border-l-success dark:border-l-success"
+            : "border-l-danger dark:border-l-danger";
 
         return (
             <div
                 key={tx.id}
-                className={`flex items-center justify-between p-3 rounded-xl border transition-colors group ${bgClass}`}
+                className={`flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 border-l-[3px] transition-colors group hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${borderClass}`}
             >
                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
                     <div
@@ -93,13 +93,13 @@ export function TransactionsPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
-                    <span className={`font-bold font-mono-num whitespace-nowrap text-sm sm:text-base ${isIncome ? 'text-success' : 'text-danger'}`}>
+                    <span className={`font-bold tabular-nums whitespace-nowrap text-sm sm:text-base ${isIncome ? 'text-success' : 'text-danger'}`}>
                         {isIncome ? '+' : '-'}{tx.amount.toFixed(2)} {currency}
                     </span>
                     <div className="flex items-center opacity-100 sm:opacity-50 sm:group-hover:opacity-100 transition-opacity">
                         <button 
                             onClick={() => setEditingTx(tx)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                             title="Modifier"
                         >
                             <Edit2 className="w-4 h-4" />
@@ -147,72 +147,78 @@ export function TransactionsPage() {
 
             {/* Filters */}
             <Card>
-                <CardContent className="pt-6">
-                    <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                            <Input
-                                placeholder="Rechercher une transaction..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10"
-                            />
+                <CardContent className="p-4 sm:p-5">
+                    <div className="flex flex-col lg:flex-row gap-3">
+                        {/* Search and Account */}
+                        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <Input
+                                    placeholder="Rechercher..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-9 h-9 text-sm"
+                                />
+                            </div>
+                            <div className="flex items-center bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 h-9 shrink-0">
+                                <Landmark className="w-4 h-4 text-zinc-400 ml-2.5" />
+                                <select
+                                    value={selectedAccountId || ''}
+                                    onChange={(e) => setSelectedAccountId(e.target.value || null)}
+                                    className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pl-2 pr-8 h-full"
+                                >
+                                    <option value="">Tous comptes</option>
+                                    {accounts.map(acc => (
+                                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                            <Landmark className="w-4 h-4 text-zinc-400 ml-2" />
-                            <select
-                                value={selectedAccountId || ''}
-                                onChange={(e) => setSelectedAccountId(e.target.value || null)}
-                                className="bg-transparent text-sm font-medium border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 cursor-pointer pr-8"
+
+                        {/* Other filters */}
+                        <div className="flex flex-wrap lg:flex-nowrap gap-3 shrink-0 items-center">
+                            <Select
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value as TransactionType | 'ALL')}
+                                className="w-full sm:w-[130px] h-9 text-sm"
                             >
-                                <option value="">Tous les comptes</option>
-                                {accounts.map(acc => (
-                                    <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                <option value="ALL">Tous types</option>
+                                <option value="EXPENSE">Dépenses</option>
+                                <option value="INCOME">Revenus</option>
+                            </Select>
+                            <Select
+                                value={filterCategory}
+                                onChange={(e) => setFilterCategory(e.target.value)}
+                                className="w-full sm:w-[150px] h-9 text-sm"
+                            >
+                                <option value="ALL">Catégories</option>
+                                {categories.map((c) => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}
-                            </select>
+                            </Select>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <Input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="h-9 text-sm flex-1 sm:w-[130px]"
+                                    title="Date début"
+                                />
+                                <span className="text-zinc-400 text-xs">à</span>
+                                <Input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="h-9 text-sm flex-1 sm:w-[130px]"
+                                    title="Date fin"
+                                />
+                            </div>
+                            {hasActiveFilters && (
+                                <Button variant="ghost" size="sm" onClick={resetFilters} className="flex items-center justify-center gap-1 h-9 px-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 w-full lg:w-auto mt-2 lg:mt-0">
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            )}
                         </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3 items-end">
-                        <Select
-                            value={filterType}
-                            onChange={(e) => setFilterType(e.target.value as TransactionType | 'ALL')}
-                            className="w-full sm:w-40"
-                        >
-                            <option value="ALL">Tous les types</option>
-                            <option value="EXPENSE">Dépenses</option>
-                            <option value="INCOME">Revenus</option>
-                        </Select>
-                        <Select
-                            value={filterCategory}
-                            onChange={(e) => setFilterCategory(e.target.value)}
-                            className="w-full sm:w-48"
-                        >
-                            <option value="ALL">Toutes les catégories</option>
-                            {categories.map((c) => (
-                                <option key={c.id} value={c.id}>{c.name}</option>
-                            ))}
-                        </Select>
-                        <div className="flex flex-col gap-1 flex-1">
-                            <label className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Date début</label>
-                            <Input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-1 flex-1">
-                            <label className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Date fin</label>
-                            <Input
-                                type="date"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                            />
-                        </div>
-                        {hasActiveFilters && (
-                            <Button variant="outline" size="sm" onClick={resetFilters} className="flex items-center gap-1 shrink-0">
-                                <X className="w-4 h-4" /> Réinitialiser
-                            </Button>
-                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -236,10 +242,10 @@ export function TransactionsPage() {
                             <div className="space-y-2">
                                 {incomeTransactions.map(tx => renderTransaction(tx, true))}
                             </div>
-                            <div className="flex justify-between items-center py-3 px-3 mt-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                            <div className="flex justify-between items-center py-3 px-3 mt-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
                                 <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-sm ml-2">Sous-total Revenus</span>
                                 <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
-                                    <span className="font-bold text-success font-mono-num text-sm sm:text-base">+{tIncome.toFixed(2)} {currency}</span>
+                                    <span className="font-bold text-success tabular-nums text-sm sm:text-base">+{tIncome.toFixed(2)} {currency}</span>
                                     <div className="w-[64px] hidden sm:block" />
                                     <div className="w-[64px] sm:hidden" />
                                 </div>
@@ -257,10 +263,10 @@ export function TransactionsPage() {
                             <div className="space-y-2">
                                 {expenseTransactions.map(tx => renderTransaction(tx, false))}
                             </div>
-                            <div className="flex justify-between items-center py-3 px-3 mt-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                            <div className="flex justify-between items-center py-3 px-3 mt-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
                                 <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-sm ml-2">Sous-total Dépenses</span>
                                 <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
-                                    <span className="font-bold text-danger font-mono-num text-sm sm:text-base">-{tExpense.toFixed(2)} {currency}</span>
+                                    <span className="font-bold text-danger tabular-nums text-sm sm:text-base">-{tExpense.toFixed(2)} {currency}</span>
                                     <div className="w-[64px] hidden sm:block" />
                                     <div className="w-[64px] sm:hidden" />
                                 </div>
@@ -269,10 +275,10 @@ export function TransactionsPage() {
                     )}
 
                     {/* Grand Total */}
-                    <div className={`flex justify-between items-center py-5 px-3 mt-6 rounded-xl border-2 ${grandTotal >= 0 ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
+                    <div className={`flex justify-between items-center py-5 px-3 mt-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-[4px] ${grandTotal >= 0 ? 'border-l-success' : 'border-l-danger'}`}>
                         <span className="font-black text-lg tracking-tight text-zinc-900 dark:text-zinc-50 ml-3">BILAN GÉNÉRAL</span>
                         <div className="flex items-center gap-3 sm:gap-5 shrink-0 pl-4">
-                            <span className={`font-black text-xl sm:text-2xl font-mono-num ${grandTotal >= 0 ? 'text-success' : 'text-danger'}`}>
+                            <span className={`font-black text-xl sm:text-2xl tabular-nums ${grandTotal >= 0 ? 'text-success' : 'text-danger'}`}>
                                 {grandTotal > 0 ? '+' : ''}{grandTotal.toFixed(2)} {currency}
                             </span>
                             <div className="w-[64px] hidden sm:block" />
